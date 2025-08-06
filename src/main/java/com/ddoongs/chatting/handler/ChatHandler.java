@@ -1,5 +1,6 @@
 package com.ddoongs.chatting.handler;
 
+import com.ddoongs.chatting.dto.Chat;
 import com.ddoongs.chatting.session.WebSocketSessionManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

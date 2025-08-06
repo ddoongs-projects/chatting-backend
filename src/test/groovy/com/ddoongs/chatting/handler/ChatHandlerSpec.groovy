@@ -1,6 +1,7 @@
 package com.ddoongs.chatting.handler
 
 import com.ddoongs.chatting.ChattingApplication
+import com.ddoongs.chatting.dto.Chat
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

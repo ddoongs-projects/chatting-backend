@@ -1,0 +1,24 @@
+spring:
+  application.name: chatting-backend
+  datasource:
+    hikari:
+      jdbc-url: jdbc:mysql://localhost:13306/chatting
+      username: dev_user
+      password: dev_password
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      pool-name: ConnectionPool
+      minimum-idle: 10
+      maximum-pool-size: 20
+      idle-timeout: 60000
+      connection-timeout: 30000
+  jpa:
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always

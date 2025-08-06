@@ -1,4 +1,4 @@
-package com.ddoongs.chatting.handler;
+package com.ddoongs.chatting.dto;
 
 public record Chat(String username, String content) {
 
