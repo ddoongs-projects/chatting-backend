@@ -1,12 +1,17 @@
 package com.ddoongs.chatting.handler
 
 import com.ddoongs.chatting.ChattingApplication
-import com.ddoongs.chatting.dto.Chat
+import com.ddoongs.chatting.dto.websocket.inbound.ChatRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.socket.TextMessage
+import org.springframework.web.socket.WebSocketHttpHeaders
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.handler.TextWebSocketHandler
@@ -30,13 +35,19 @@ class ChatHandlerSpec extends Specification {
 
     def "Group Chat Basic Test"() {
         given:
-        def url = "ws://localhost:${port}/ws/v1/chat"
-        def (clientA, clientB, clientC) = [createClient(url), createClient(url), createClient(url)]
+        register("clientA", "testpassA")
+        register("clientB", "testpassB")
+        register("clientC", "testpassC")
+
+        def sessionIdA = login("clientA", "testpassA")
+        def sessionIdB = login("clientB", "testpassB")
+        def sessionIdC = login("clientC", "testpassC")
+        def (clientA, clientB, clientC) = [createClient(sessionIdA), createClient(sessionIdB), createClient(sessionIdC)]
 
         when:
-        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new Chat("clientA", "안녕하세요. A 입니다."))))
-        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new Chat("clientB", "안녕하세요. B 입니다."))))
-        clientC.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new Chat("clientC", "안녕하세요. C 입니다."))))
+        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new ChatRequest("clientA", "안녕하세요. A 입니다."))))
+        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new ChatRequest("clientB", "안녕하세요. B 입니다."))))
+        clientC.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new ChatRequest("clientC", "안녕하세요. C 입니다."))))
 
         then:
         def resultA = clientA.queue.poll(1, TimeUnit.SECONDS) + clientA.queue.poll(1, TimeUnit.SECONDS)
@@ -53,21 +64,62 @@ class ChatHandlerSpec extends Specification {
         clientC.queue.isEmpty()
 
         cleanup:
+        unregister(sessionIdA)
+        unregister(sessionIdB)
+        unregister(sessionIdC)
         clientA.session?.close()
         clientB.session?.close()
         clientC.session?.close()
     }
 
-    static def createClient(String url) {
+    def createClient(String sessionId) {
+        def url = "ws://localhost:${port}/ws/v1/chat"
         BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(1)
+        def webSocketHttpHeaders = new WebSocketHttpHeaders()
+        webSocketHttpHeaders.add("Cookie", "SESSION=${sessionId}")
         def client = new StandardWebSocketClient()
         WebSocketSession webSocketSession = client.execute(new TextWebSocketHandler() {
             @Override
             protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
                 blockingQueue.put(message.payload)
             }
-        }, url).get()
+        }, webSocketHttpHeaders, new URI(url)).get()
 
         [queue: blockingQueue, session: webSocketSession]
+    }
+
+    def unregister(String sessionId) {
+        def url = "http://localhost:${port}/api/v1/auth/unregister"
+
+        def headers = new HttpHeaders()
+        headers.add("Content-Type", "application/json")
+        headers.add("Cookie", "SESSION=${sessionId}")
+        def httpEntity = new HttpEntity(headers)
+        def responseEntity = new RestTemplate().exchange(url, HttpMethod.POST, httpEntity, String)
+        responseEntity.body
+    }
+
+    def login(String username, String password) {
+        def url = "http://localhost:${port}/api/v1/auth/login"
+        def headers = new HttpHeaders(["Content-Type": "application/json"])
+        def jsonBody = objectMapper.writeValueAsString([username: username, password: password])
+        def httpEntity = new HttpEntity(jsonBody, headers)
+        def responseEntity = new RestTemplate().exchange(url, HttpMethod.POST, httpEntity, String)
+        def sessionId = responseEntity.body
+        sessionId
+    }
+
+
+    def register(String username, String password) {
+        def url = "http://localhost:${port}/api/v1/auth/unregister"
+        def headers = new HttpHeaders(["Content-Type": "application/json"])
+        def jsonBody = objectMapper.writeValueAsString([username: username, password: password])
+        def httpEntity = new HttpEntity(jsonBody, headers)
+
+        try {
+            new RestTemplate().exchange(url, HttpMethod.POST, httpEntity, String)
+        } catch (Exception ignore) {
+            // 이미 등록된 유저는 무시
+        }
     }
 }
