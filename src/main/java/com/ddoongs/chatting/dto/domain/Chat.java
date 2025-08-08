@@ -1,4 +1,4 @@
-package com.ddoongs.chatting.dto;
+package com.ddoongs.chatting.security.dto.domain;
 
 public record Chat(String username, String content) {
 
