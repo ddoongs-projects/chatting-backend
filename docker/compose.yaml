@@ -1,0 +1,26 @@
+# name: library # .env에서 자동 설정됨
+services:
+  mysql:
+    image: mysql:lts
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: chatting
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: dev_password
+    ports:
+      - "13306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+  redis:
+    image: redis:7.4.5
+    ports:
+      - "16379:6379"
+    volumes:
+      - "./data/redis/data:/data"
+  redis-insight:
+    image: redis/redisinsight:2.68
+    ports:
+      - "15540:5540"
+    volumes:
+      - "./data/redis-insight/data:/data"
