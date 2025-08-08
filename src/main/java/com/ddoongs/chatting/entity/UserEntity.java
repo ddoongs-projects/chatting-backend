@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "chat_user")
@@ -23,6 +24,11 @@ public class UserEntity extends BaseEntity {
   @Column(name = "password", nullable = false)
   private String password;
 
+  @Column(name = "connection_invite_code", nullable = false)
+  private String connectionInviteCode;
+
+  @Column(name = "connection_count", nullable = false)
+  private int connectionCount;
 
   protected UserEntity() {
   }
@@ -30,6 +36,7 @@ public class UserEntity extends BaseEntity {
   public UserEntity(String username, String password) {
     this.username = username;
     this.password = password;
+    this.connectionInviteCode = UUID.randomUUID().toString().replace("-", "");
   }
 
   @Override
@@ -67,4 +74,15 @@ public class UserEntity extends BaseEntity {
     return password;
   }
 
+  public String getConnectionInviteCode() {
+    return connectionInviteCode;
+  }
+
+  public int getConnectionCount() {
+    return connectionCount;
+  }
+
+  public void setConnectionCount(int friendCount) {
+    this.connectionCount = friendCount;
+  }
 }
