@@ -1,8 +1,8 @@
 package com.ddoongs.chatting.service;
 
 import com.ddoongs.chatting.dto.domain.UserId;
-import com.ddoongs.chatting.entity.ChatUserEntity;
-import com.ddoongs.chatting.repository.ChatUserRepository;
+import com.ddoongs.chatting.entity.UserEntity;
+import com.ddoongs.chatting.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,40 +10,39 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ChatUserService {
+public class UserService {
 
-
-  private static final Logger log = LoggerFactory.getLogger(ChatUserService.class);
+  private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final SessionService sessionService;
-  private final ChatUserRepository chatUserRepository;
+  private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
 
-  public ChatUserService(SessionService sessionService, ChatUserRepository chatUserRepository,
+  public UserService(SessionService sessionService, UserRepository userRepository,
       PasswordEncoder passwordEncoder) {
     this.sessionService = sessionService;
-    this.chatUserRepository = chatUserRepository;
+    this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
   }
 
   @Transactional
   public UserId addUser(String username, String password) {
-    ChatUserEntity chatUserEntity = chatUserRepository.save(
-        new ChatUserEntity(username, passwordEncoder.encode(password)));
+    UserEntity userEntity = userRepository.save(
+        new UserEntity(username, passwordEncoder.encode(password)));
     log.info("User registered: UserId: {}, Username: {}",
-        chatUserEntity.getUserId(),
-        chatUserEntity.getUsername());
-    return new UserId(chatUserEntity.getUserId());
+        userEntity.getUserId(),
+        userEntity.getUsername());
+    return new UserId(userEntity.getUserId());
   }
 
   @Transactional
   public void removeUser() {
     String username = sessionService.getUsername();
-    ChatUserEntity chatUserEntity = chatUserRepository.findByUsername(username).orElseThrow();
-    chatUserRepository.deleteById(chatUserEntity.getUserId());
+    UserEntity userEntity = userRepository.findByUsername(username).orElseThrow();
+    userRepository.deleteById(userEntity.getUserId());
 
     log.info("User unregistered. UserId: {}, Username: {}",
-        chatUserEntity.getUserId(),
-        chatUserEntity.getUsername());
+        userEntity.getUserId(),
+        userEntity.getUsername());
   }
 }

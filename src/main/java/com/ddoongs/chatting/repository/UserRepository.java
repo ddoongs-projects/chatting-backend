@@ -1,12 +1,12 @@
 package com.ddoongs.chatting.repository;
 
-import com.ddoongs.chatting.entity.ChatUserEntity;
+import com.ddoongs.chatting.entity.UserEntity;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
 
-public interface ChatUserRepository extends JpaRepository<ChatUserEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-  Optional<ChatUserEntity> findByUsername(@NonNull String username);
+  Optional<UserEntity> findByUsername(@NonNull String username);
 
 }

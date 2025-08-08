@@ -1,7 +1,7 @@
-package com.ddoongs.chatting.security.controller;
+package com.ddoongs.chatting.controller;
 
 import com.ddoongs.chatting.dto.restapi.UserRegisterRequest;
-import com.ddoongs.chatting.service.ChatUserService;
+import com.ddoongs.chatting.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,20 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/api/v1/auth")
 @RestController
-public class ChatUserController {
+public class UserController {
 
 
-  private static final Logger log = LoggerFactory.getLogger(ChatUserController.class);
-  private final ChatUserService chatUserService;
+  private static final Logger log = LoggerFactory.getLogger(UserController.class);
+  private final UserService userService;
 
-  public ChatUserController(ChatUserService chatUserService) {
-    this.chatUserService = chatUserService;
+  public UserController(UserService userService) {
+    this.userService = userService;
   }
 
   @PostMapping("/register")
   public ResponseEntity<String> register(@RequestBody UserRegisterRequest request) {
     try {
-      chatUserService.addUser(request.username(), request.password());
+      userService.addUser(request.username(), request.password());
       return ResponseEntity.ok("User registered.");
     } catch (Exception ex) {
       log.error("Add user failed. cause: {}", ex.getMessage());
@@ -38,7 +38,7 @@ public class ChatUserController {
   @PostMapping("/unregister")
   public ResponseEntity<String> register(HttpServletRequest request) {
     try {
-      chatUserService.removeUser();
+      userService.removeUser();
       request.getSession().invalidate();
       return ResponseEntity.ok("User unregistered.");
     } catch (Exception ex) {

@@ -1,7 +1,7 @@
 package com.ddoongs.chatting.config;
 
+import com.ddoongs.chatting.auth.WebSocketHttpSessionHandShakeInterceptor;
 import com.ddoongs.chatting.handler.ChatHandler;
-import com.ddoongs.chatting.security.auth.WebSocketHttpSessionHandShakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;

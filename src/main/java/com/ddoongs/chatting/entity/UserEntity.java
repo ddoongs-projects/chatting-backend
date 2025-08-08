@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "chat_user")
-public class ChatUserEntity extends BaseEntity {
+public class UserEntity extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +24,10 @@ public class ChatUserEntity extends BaseEntity {
   private String password;
 
 
-  protected ChatUserEntity() {
+  protected UserEntity() {
   }
 
-  public ChatUserEntity(String username, String password) {
+  public UserEntity(String username, String password) {
     this.username = username;
     this.password = password;
   }
@@ -40,7 +40,7 @@ public class ChatUserEntity extends BaseEntity {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ChatUserEntity that = (ChatUserEntity) o;
+    UserEntity that = (UserEntity) o;
     return Objects.equals(username, that.username);
   }
 

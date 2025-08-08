@@ -1,6 +1,6 @@
-package com.ddoongs.chatting.security.auth;
+package com.ddoongs.chatting.auth;
 
-import com.ddoongs.chatting.security.session.HttpSessionRepository;
+import com.ddoongs.chatting.session.HttpSessionRepository;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;

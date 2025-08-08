@@ -1,4 +1,4 @@
-package com.ddoongs.chatting.security.controller;
+package com.ddoongs.chatting.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

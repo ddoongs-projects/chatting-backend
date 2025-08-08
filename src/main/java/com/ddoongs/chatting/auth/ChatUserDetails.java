@@ -1,4 +1,4 @@
-package com.ddoongs.chatting.security.auth;
+package com.ddoongs.chatting.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

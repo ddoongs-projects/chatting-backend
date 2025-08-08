@@ -1,4 +1,4 @@
-package com.ddoongs.chatting.security.session;
+package com.ddoongs.chatting.session;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;

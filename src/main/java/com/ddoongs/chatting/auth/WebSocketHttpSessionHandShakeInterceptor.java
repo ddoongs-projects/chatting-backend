@@ -1,4 +1,4 @@
-package com.ddoongs.chatting.security.auth;
+package com.ddoongs.chatting.auth;
 
 import com.ddoongs.chatting.constants.Constants;
 import jakarta.servlet.http.HttpSession;
