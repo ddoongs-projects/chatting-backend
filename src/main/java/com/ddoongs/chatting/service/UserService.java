@@ -1,8 +1,12 @@
 package com.ddoongs.chatting.service;
 
+import com.ddoongs.chatting.dto.domain.InviteCode;
+import com.ddoongs.chatting.dto.domain.User;
 import com.ddoongs.chatting.dto.domain.UserId;
+import com.ddoongs.chatting.dto.projection.UsernameProjection;
 import com.ddoongs.chatting.entity.UserEntity;
 import com.ddoongs.chatting.repository.UserRepository;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +27,16 @@ public class UserService {
     this.sessionService = sessionService;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
+  }
+
+  public Optional<String> getUsername(UserId userId) {
+    return userRepository.findUsernameByUserId(userId.id()).map(UsernameProjection::getUsername);
+  }
+
+  public Optional<User> getUser(InviteCode inviteCode) {
+    return userRepository.findByConnectionInviteCode(inviteCode.code())
+        .map(entity -> new User(new UserId(
+            entity.getUserId()), entity.getUsername()));
   }
 
   @Transactional
