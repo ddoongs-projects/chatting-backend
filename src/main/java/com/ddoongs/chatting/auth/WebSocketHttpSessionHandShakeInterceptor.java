@@ -10,6 +10,8 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
@@ -29,15 +31,23 @@ public class WebSocketHttpSessionHandShakeInterceptor extends HttpSessionHandsha
       @NonNull Map<String, Object> attributes
   ) {
     if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      if (authentication == null) {
+        log.warn("WebSocket handshake failed. authentication is null");
+        return false;
+      }
+
       HttpSession httpSession = servletServerHttpRequest.getServletRequest().getSession(false);
-      if (httpSession != null) {
-        attributes.put(Constants.HTTP_SESSION_ID.getValue(), httpSession.getId());
-        return true;
-      } else {
+      if (httpSession == null) {
         log.info("WebSocket handshake failed. httpSession is null");
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         return false;
       }
+
+      ChatUserDetails chatUserDetails = (ChatUserDetails) authentication.getPrincipal();
+      attributes.put(Constants.HTTP_SESSION_ID.getValue(), httpSession.getId());
+      attributes.put(Constants.USER_ID.getValue(), chatUserDetails.getUserId());
+      return false;
     }
 
     log.info("WebSocket handshake failed. request: {}", request.getClass());
