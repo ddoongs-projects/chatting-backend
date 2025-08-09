@@ -29,8 +29,18 @@ public class UserService {
     this.passwordEncoder = passwordEncoder;
   }
 
+  public Optional<InviteCode> getInviteCode(UserId userId) {
+    return userRepository.findInviteCodeByUserId(userId.id())
+        .map(inviteCode -> new InviteCode(inviteCode.getConnectionInviteCode()));
+  }
+
   public Optional<String> getUsername(UserId userId) {
     return userRepository.findUsernameByUserId(userId.id()).map(UsernameProjection::getUsername);
+  }
+
+  public Optional<UserId> getUserId(String username) {
+    return userRepository.findByUsername(username)
+        .map(userEntity -> new UserId(userEntity.getUserId()));
   }
 
   public Optional<User> getUser(InviteCode inviteCode) {
