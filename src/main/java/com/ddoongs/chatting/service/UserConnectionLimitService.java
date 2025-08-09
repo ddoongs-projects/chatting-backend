@@ -29,10 +29,6 @@ public class UserConnectionLimitService {
     return userRepository;
   }
 
-  public void setLimitConnections(int limitConnections) {
-    this.limitConnections = limitConnections;
-  }
-
   @Transactional
   public void accept(UserId acceptorUserId, UserId inviterUserId) {
     Long firstUserId = Long.min(acceptorUserId.id(), inviterUserId.id());
@@ -53,7 +49,7 @@ public class UserConnectionLimitService {
 
     Function<Long, String> getErrorMessage = userId -> userId.equals(acceptorUserId.id())
         ? "Connection limit reached"
-        : "Connection limit reached by other user";
+        : "Connection limit reached by the other user";
 
     int firstConnectionCount = firstUserEntity.getConnectionCount();
     if (firstConnectionCount >= limitConnections) {
@@ -68,5 +64,13 @@ public class UserConnectionLimitService {
     firstUserEntity.setConnectionCount(firstConnectionCount + 1);
     secondUserEntity.setConnectionCount(secondConnectionCount + 1);
     userConnectionEntity.setStatus(UserConnectionsStatus.ACCEPTED);
+  }
+
+  public int getLimitConnections() {
+    return limitConnections;
+  }
+
+  public void setLimitConnections(int limitConnections) {
+    this.limitConnections = limitConnections;
   }
 }

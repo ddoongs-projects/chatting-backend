@@ -3,10 +3,14 @@ package com.ddoongs.chatting.repository;
 import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.projection.InviterUserIdProjection;
 import com.ddoongs.chatting.dto.projection.UserConnectionStatusProjection;
+import com.ddoongs.chatting.dto.projection.UserIdUsernameProjection;
 import com.ddoongs.chatting.entity.UserConnectionEntity;
 import com.ddoongs.chatting.entity.UserConnectionId;
+import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 
 public interface UserConnectionRepository extends
@@ -23,5 +27,25 @@ public interface UserConnectionRepository extends
   Optional<InviterUserIdProjection> findInviterUserIdByPartnerAUserIdAndPartnerBUserId(
       @NonNull Long partnerAUserId, @NonNull Long partnerBUserId);
 
+  @Query(
+      "SELECT u.partnerBUserId AS userId, userB.username as username "
+          + "FROM UserConnectionEntity u "
+          + "INNER JOIN UserEntity userB "
+          + "ON u.partnerBUserId = userB.userId "
+          + "WHERE u.partnerAUserId = :userId AND u.status = :status"
+  )
+  List<UserIdUsernameProjection> findConnectionsByPartnerAUserIdAndStatus(
+      @Param("userId") Long userId,
+      @Param("status") UserConnectionsStatus status);
 
+  @Query(
+      "SELECT u.partnerAUserId AS userId, userA.username as username "
+          + "FROM UserConnectionEntity u "
+          + "INNER JOIN UserEntity userA "
+          + "ON u.partnerAUserId = userA.userId "
+          + "WHERE u.partnerBUserId = :userId AND u.status = :status"
+  )
+  List<UserIdUsernameProjection> findConnectionsByPartnerBUserIdAndStatus(
+      @Param("userId") Long userId,
+      @Param("status") UserConnectionsStatus status);
 }

@@ -3,6 +3,7 @@ package com.ddoongs.chatting.service;
 import com.ddoongs.chatting.dto.domain.InviteCode;
 import com.ddoongs.chatting.dto.domain.User;
 import com.ddoongs.chatting.dto.domain.UserId;
+import com.ddoongs.chatting.dto.projection.CountProjection;
 import com.ddoongs.chatting.dto.projection.UsernameProjection;
 import com.ddoongs.chatting.entity.UserEntity;
 import com.ddoongs.chatting.repository.UserRepository;
@@ -32,6 +33,10 @@ public class UserService {
   public Optional<InviteCode> getInviteCode(UserId userId) {
     return userRepository.findInviteCodeByUserId(userId.id())
         .map(inviteCode -> new InviteCode(inviteCode.getConnectionInviteCode()));
+  }
+
+  public Optional<Integer> getConnectionCount(UserId userId) {
+    return userRepository.findCountByUserId(userId.id()).map(CountProjection::getConnectionCount);
   }
 
   public Optional<String> getUsername(UserId userId) {

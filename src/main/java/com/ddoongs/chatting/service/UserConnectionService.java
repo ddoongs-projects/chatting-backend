@@ -4,10 +4,13 @@ import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.domain.InviteCode;
 import com.ddoongs.chatting.dto.domain.User;
 import com.ddoongs.chatting.dto.domain.UserId;
+import com.ddoongs.chatting.dto.projection.UserIdUsernameProjection;
 import com.ddoongs.chatting.entity.UserConnectionEntity;
 import com.ddoongs.chatting.repository.UserConnectionRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -31,6 +34,17 @@ public class UserConnectionService {
     this.userConnectionLimitService = userConnectionLimitService;
   }
 
+  public List<User> getUsersByStatus(UserId userId, UserConnectionsStatus status) {
+    List<UserIdUsernameProjection> usersA = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(
+        userId.id(), status);
+    List<UserIdUsernameProjection> usersB = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(
+        userId.id(), status);
+
+    return Stream.concat(usersA.stream(), usersB.stream())
+        .map(item -> new User(new UserId(item.getUserId()), item.getUsername()))
+        .toList();
+  }
+
   public Pair<Optional<UserId>, String> invite(UserId inviterUserId, InviteCode inviteCode) {
     Optional<User> partner = userService.getUser(inviteCode);
     if (partner.isEmpty()) {
@@ -48,6 +62,12 @@ public class UserConnectionService {
 
     return switch (status) {
       case NONE, DISCONNECTED -> {
+        if (userService.getConnectionCount(inviterUserId)
+            .filter(count -> count >= userConnectionLimitService.getLimitConnections())
+            .isPresent()) {
+          yield Pair.of(Optional.empty(), "Connection limit reached");
+        }
+
         Optional<String> inviterUsername = userService.getUsername(inviterUserId);
         if (inviterUsername.isEmpty()) {
           log.warn("InviteRequest failed.");
@@ -112,8 +132,28 @@ public class UserConnectionService {
       log.error("Accept failed. cause: {}", ex.getMessage());
       return Pair.of(Optional.empty(), "Accept failed");
     } catch (IllegalStateException ex) {
-      return Pair.of(Optional.empty(), "Accept failed");
+      return Pair.of(Optional.empty(), ex.getMessage());
     }
+  }
+
+  public Pair<Boolean, String> reject(UserId senderUserId, String inviterUsername) {
+    return userService.getUserId(inviterUsername)
+        .filter(inviterUserId -> !inviterUserId.equals(senderUserId))
+        .filter(
+            inviterUserId -> getInviterUserId(inviterUserId, senderUserId).map(
+                invitationSenderUserId ->
+                    invitationSenderUserId.equals(inviterUserId)).isPresent())
+        .filter(inviterUserId -> getStatus(inviterUserId, senderUserId)
+            == UserConnectionsStatus.PENDING)
+        .map(inviterUserId -> {
+          try {
+            setStatus(inviterUserId, senderUserId, UserConnectionsStatus.REJECTED);
+            return Pair.of(true, inviterUsername);
+          } catch (Exception ex) {
+            log.error("Set Reject failed. cause: {}", ex.getMessage());
+            return Pair.of(false, "Reject failed");
+          }
+        }).orElse(Pair.of(false, "Reject failed"));
   }
 
   private Optional<UserId> getInviterUserId(UserId partnerAUserId, UserId partnerBUserId) {
