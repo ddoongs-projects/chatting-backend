@@ -14,8 +14,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+@Component
 public class InviteRequestHandler implements BaseRequestHandler<InviteRequest> {
 
   private static final Logger log = LoggerFactory.getLogger(InviteRequestHandler.class);
