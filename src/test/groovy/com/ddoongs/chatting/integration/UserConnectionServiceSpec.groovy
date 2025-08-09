@@ -1,7 +1,9 @@
 package com.ddoongs.chatting.integration
 
 import com.ddoongs.chatting.ChattingApplication
+import com.ddoongs.chatting.constants.UserConnectionsStatus
 import com.ddoongs.chatting.dto.domain.UserId
+import com.ddoongs.chatting.entity.UserConnectionId
 import com.ddoongs.chatting.repository.UserConnectionRepository
 import com.ddoongs.chatting.repository.UserRepository
 import com.ddoongs.chatting.service.UserConnectionLimitService
@@ -12,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 
 @SpringBootTest(classes = ChattingApplication.class)
-public class UserConnectionServiceSpec extends Specification {
+class UserConnectionServiceSpec extends Specification {
     @Autowired
     UserService userService;
 
@@ -27,6 +29,29 @@ public class UserConnectionServiceSpec extends Specification {
 
     @Autowired
     UserConnectionRepository userConnectionRepository;
+
+    def cleanup() {
+        (0..19).each {
+            userService.getUserId("testUser${it}").ifPresent { userId ->
+                userRepository.deleteById(userId.id())
+
+                for (def status : UserConnectionsStatus.values()) {
+                    userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(userId.id(), status).each {
+                        userConnectionRepository.deleteById(new UserConnectionId(
+                                Long.min(userId.id(), it.getUserId()),
+                                Long.max(userId.id(), it.getUserId())
+                        ))
+                    }
+                    userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(userId.id(), status).each {
+                        userConnectionRepository.deleteById(new UserConnectionId(
+                                Long.min(userId.id(), it.getUserId()),
+                                Long.max(userId.id(), it.getUserId())
+                        ))
+                    }
+                }
+            }
+        }
+    }
 
     def "연결 요청 수락은 연결 제한 수를 넘을 수 없다"() {
         given:
@@ -65,12 +90,44 @@ public class UserConnectionServiceSpec extends Specification {
         results.count { it.isPresent() } == 1
 
 
-        cleanup:
-        (0..19).each {
-            def userId = userService.getUserId("testUser${it}").get()
-            userRepository.deleteById(userId.id())
-        }
     }
 
+
+    def "연결 카운트는 연결 삭제 시 정확히 반영된다"() {
+        given:
+        (0..10).each {
+            userService.addUser("testUser${it}", "testPass${it}")
+        }
+
+        def userIdA = userService.getUserId("testUser0").get()
+        def inviteCodeA = userService.getInviteCode(userIdA).get()
+
+        (1..10).each {
+            userConnectionService.invite(userService.getUserId("testUser${it}").get(), inviteCodeA)
+        }
+
+        (1..5).each {
+            userConnectionService.accept(userIdA, "testUser${it}")
+        }
+
+        def results = Collections.synchronizedList(new ArrayList<Boolean>())
+
+
+        when:
+        def threads = (1..10).collect { idx ->
+            Thread.start {
+                def userId = userService.getUserId("testUser${idx}")
+                results << userConnectionService.disconnect(userId.get(), "testUser0").getFirst()
+            }
+        }
+        threads*.join()
+
+
+        then:
+        results.count { it == true } == 5
+        userService.getConnectionCount(userService.getUserId("testUser0").get()).get() == 0
+
+
+    }
 
 }
