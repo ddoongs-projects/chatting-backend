@@ -31,14 +31,14 @@ public class UserConnectionServiceSpec extends Specification {
     def "연결 요청 수락은 연결 제한 수를 넘을 수 없다"() {
         given:
         userConnectionLimitService.setLimitConnections(10)
-        (0..19).collect {
+        (0..19).each {
             userService.addUser("testUser${it}", "testPass${it}")
         }
 
         def userIdA = userService.getUserId("testUser0").get()
         def inviteCodeA = userService.getInviteCode(userIdA).get()
 
-        (1..9).collect {
+        (1..9).each {
             userConnectionService.invite(userService.getUserId("testUser${it}").get(), inviteCodeA)
             userConnectionService.accept(userIdA, "testUser${it}")
         }

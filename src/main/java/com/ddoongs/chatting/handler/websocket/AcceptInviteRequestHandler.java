@@ -3,29 +3,31 @@ package com.ddoongs.chatting.handler.websocket;
 import com.ddoongs.chatting.constants.Constants;
 import com.ddoongs.chatting.constants.MessageType;
 import com.ddoongs.chatting.dto.domain.UserId;
-import com.ddoongs.chatting.dto.websocket.inbound.AcceptRequest;
-import com.ddoongs.chatting.dto.websocket.outbound.AcceptNotification;
-import com.ddoongs.chatting.dto.websocket.outbound.AcceptResponse;
+import com.ddoongs.chatting.dto.websocket.inbound.AcceptInviteRequest;
+import com.ddoongs.chatting.dto.websocket.outbound.AcceptInviteNotification;
+import com.ddoongs.chatting.dto.websocket.outbound.AcceptInviteResponse;
 import com.ddoongs.chatting.dto.websocket.outbound.ErrorResponse;
 import com.ddoongs.chatting.service.UserConnectionService;
 import com.ddoongs.chatting.session.WebSocketSessionManager;
 import java.util.Optional;
 import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-public class AcceptRequestHandler implements BaseRequestHandler<AcceptRequest> {
+@Component
+public class AcceptInviteRequestHandler implements BaseRequestHandler<AcceptInviteRequest> {
 
   private final UserConnectionService userConnectionService;
   private final WebSocketSessionManager webSocketSessionManager;
 
-  public AcceptRequestHandler(UserConnectionService userConnectionService,
+  public AcceptInviteRequestHandler(UserConnectionService userConnectionService,
       WebSocketSessionManager webSocketSessionManager) {
     this.userConnectionService = userConnectionService;
     this.webSocketSessionManager = webSocketSessionManager;
   }
 
   @Override
-  public void handleRequest(WebSocketSession senderSession, AcceptRequest request) {
+  public void handleRequest(WebSocketSession senderSession, AcceptInviteRequest request) {
     UserId acceptorUserId =
         (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
     Pair<Optional<UserId>, String> result = userConnectionService.accept(acceptorUserId,
@@ -34,18 +36,18 @@ public class AcceptRequestHandler implements BaseRequestHandler<AcceptRequest> {
     result.getFirst().ifPresentOrElse(inviterUserId -> {
       webSocketSessionManager.sendMessage(
           senderSession,
-          new AcceptResponse(request.getUsername()));
+          new AcceptInviteResponse(request.getUsername()));
 
       String acceptorUsername = result.getSecond();
 
       webSocketSessionManager.sendMessage(
           webSocketSessionManager.getSession(inviterUserId),
-          new AcceptNotification(acceptorUsername));
+          new AcceptInviteNotification(acceptorUsername));
     }, () -> {
       String errorMessage = result.getSecond();
       webSocketSessionManager.sendMessage(
           senderSession,
-          new ErrorResponse(MessageType.ACCEPT_REQUEST, errorMessage));
+          new ErrorResponse(MessageType.ACCEPT_INVITE_REQUEST, errorMessage));
     });
   }
 }

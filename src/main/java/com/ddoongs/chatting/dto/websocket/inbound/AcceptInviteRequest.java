@@ -4,13 +4,13 @@ import com.ddoongs.chatting.constants.MessageType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AcceptRequest extends BaseRequest {
+public class AcceptInviteRequest extends BaseRequest {
 
   private final String username;
 
   @JsonCreator
-  public AcceptRequest(@JsonProperty("username") String username) {
-    super(MessageType.ACCEPT_REQUEST);
+  public AcceptInviteRequest(@JsonProperty("username") String username) {
+    super(MessageType.ACCEPT_INVITE_REQUEST);
     this.username = username;
   }
 

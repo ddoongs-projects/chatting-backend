@@ -2,10 +2,17 @@ package com.ddoongs.chatting.constants;
 
 public class MessageType {
 
+  public static final String FETCH_USER_INVITE_CODE_REQUEST = "FETCH_USER_INVITE_CODE_REQUEST";
+  public static final String FETCH_USER_INVITE_CODE_RESPONSE = "FETCH_USER_INVITE_CODE_RESPONSE";
+  public static final String FETCH_CONNECTIONS_REQUEST = "FETCH_CONNECTIONS_REQUEST";
+  public static final String FETCH_CONNECTIONS_RESPONSE = "FETCH_CONNECTIONS_RESPONSE";
   public static final String INVITE_REQUEST = "INVITE_REQUEST";
   public static final String INVITE_RESPONSE = "INVITE_RESPONSE";
-  public static final String ACCEPT_REQUEST = "ACCEPT_REQUEST";
-  public static final String ACCEPT_RESPONSE = "ACCEPT_RESPONSE";
+  public static final String ACCEPT_INVITE_REQUEST = "ACCEPT_INVITE_REQUEST";
+  public static final String ACCEPT_INVITE_RESPONSE = "ACCEPT_INVITE_RESPONSE";
+  public static final String REJECT_INVITE_REQUEST = "REJECT_INVITE_REQUEST";
+  public static final String REJECT_INVITE_RESPONSE = "REJECT_INVITE_RESPONSE";
+
   public static final String WRITE_CHAT = "WRITE_CHAT";
 
   // Notification

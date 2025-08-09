@@ -2,12 +2,12 @@ package com.ddoongs.chatting.dto.websocket.outbound;
 
 import com.ddoongs.chatting.constants.MessageType;
 
-public class AcceptResponse extends BaseMessage {
+public class AcceptInviteNotification extends BaseMessage {
 
   private final String username;
 
-  public AcceptResponse(String username) {
-    super(MessageType.ACCEPT_RESPONSE);
+  public AcceptInviteNotification(String username) {
+    super(MessageType.NOTIFY_ACCEPT);
     this.username = username;
   }
 
