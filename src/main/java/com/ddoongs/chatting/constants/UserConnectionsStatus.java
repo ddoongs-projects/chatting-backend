@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.constants;
 
-public enum UserFriendStatus {
+public enum UserConnectionsStatus {
   NONE,
   PENDING,
   ACCEPTED,

@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.entity;
 
-import com.ddoongs.chatting.constants.UserFriendStatus;
+import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +25,7 @@ public class UserConnectionEntity extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private UserFriendStatus status;
+  private UserConnectionsStatus status;
 
   @Column(name = "invite_user_id", nullable = false)
   private Long inviteUserId;
@@ -33,7 +33,8 @@ public class UserConnectionEntity extends BaseEntity {
   protected UserConnectionEntity() {
   }
 
-  public UserConnectionEntity(Long partnerAUserId, Long partnerBUserId, UserFriendStatus status,
+  public UserConnectionEntity(Long partnerAUserId, Long partnerBUserId,
+      UserConnectionsStatus status,
       Long inviteUserId) {
     this.partnerAUserId = partnerAUserId;
     this.partnerBUserId = partnerBUserId;
@@ -49,11 +50,11 @@ public class UserConnectionEntity extends BaseEntity {
     return partnerBUserId;
   }
 
-  public UserFriendStatus getStatus() {
+  public UserConnectionsStatus getStatus() {
     return status;
   }
 
-  public void setStatus(UserFriendStatus status) {
+  public void setStatus(UserConnectionsStatus status) {
     this.status = status;
   }
 

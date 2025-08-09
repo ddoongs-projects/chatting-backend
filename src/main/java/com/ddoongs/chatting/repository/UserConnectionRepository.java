@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.repository;
 
-import com.ddoongs.chatting.constants.UserFriendStatus;
+import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.projection.InviterUserIdProjection;
 import com.ddoongs.chatting.dto.projection.UserConnectionStatusProjection;
 import com.ddoongs.chatting.entity.UserConnectionEntity;
@@ -18,7 +18,7 @@ public interface UserConnectionRepository extends
   Optional<UserConnectionEntity> findByPartnerAUserIdAndPartnerBUserIdAndStatus(
       Long partnerAUserId,
       @NonNull Long partnerBUserId,
-      @NonNull UserFriendStatus status);
+      @NonNull UserConnectionsStatus status);
 
   Optional<InviterUserIdProjection> findInviterUserIdByPartnerAUserIdAndPartnerBUserId(
       @NonNull Long partnerAUserId, @NonNull Long partnerBUserId);
