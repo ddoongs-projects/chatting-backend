@@ -1,5 +1,6 @@
 package com.ddoongs.chatting.repository;
 
+import com.ddoongs.chatting.dto.projection.InviteCodeProjection;
 import com.ddoongs.chatting.dto.projection.UsernameProjection;
 import com.ddoongs.chatting.entity.UserEntity;
 import java.util.Optional;
@@ -14,4 +15,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
   Optional<UserEntity> findByConnectionInviteCode(@NonNull String connectionInviteCode);
 
+  Optional<InviteCodeProjection> findInviteCodeByUserId(@NonNull Long userId);
+
+  //  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  Optional<UserEntity> findForUpdateByUserId(@NonNull Long userId);
 }
