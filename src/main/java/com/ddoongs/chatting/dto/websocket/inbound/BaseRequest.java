@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
     @JsonSubTypes.Type(value = InviteRequest.class, name = MessageType.INVITE_REQUEST),
     @JsonSubTypes.Type(value = AcceptInviteRequest.class, name = MessageType.ACCEPT_INVITE_REQUEST),
     @JsonSubTypes.Type(value = RejectInviteRequest.class, name = MessageType.REJECT_INVITE_REQUEST),
+    @JsonSubTypes.Type(value = DisconnectConnectionRequest.class, name = MessageType.DISCONNECT_CONNECTION_REQUEST),
     @JsonSubTypes.Type(value = WriteChatRequest.class, name = MessageType.WRITE_CHAT),
     @JsonSubTypes.Type(value = KeepAliveRequest.class, name = MessageType.KEEP_ALIVE),
 })
