@@ -4,8 +4,10 @@ import com.ddoongs.chatting.dto.projection.CountProjection;
 import com.ddoongs.chatting.dto.projection.InviteCodeProjection;
 import com.ddoongs.chatting.dto.projection.UsernameProjection;
 import com.ddoongs.chatting.entity.UserEntity;
+import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.lang.NonNull;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
@@ -20,6 +22,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
   Optional<CountProjection> findCountByUserId(@NonNull Long userId);
 
-  //  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
   Optional<UserEntity> findForUpdateByUserId(@NonNull Long userId);
 }

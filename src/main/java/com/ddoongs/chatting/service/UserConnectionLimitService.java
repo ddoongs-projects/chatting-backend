@@ -66,6 +66,39 @@ public class UserConnectionLimitService {
     userConnectionEntity.setStatus(UserConnectionsStatus.ACCEPTED);
   }
 
+  @Transactional
+  public void disconnect(UserId senderUserId, UserId partnerUserId) {
+    Long firstUserId = Long.min(senderUserId.id(), partnerUserId.id());
+    Long secondUserId = Long.max(senderUserId.id(), partnerUserId.id());
+
+    // 정렬해야 lock 상황 발생하지 않음
+    UserEntity firstUserEntity = userRepository.findForUpdateByUserId(firstUserId)
+        .orElseThrow(() -> new EntityNotFoundException("Invalid userId: " + firstUserId));
+
+    UserEntity secondUserEntity = userRepository.findForUpdateByUserId(secondUserId)
+        .orElseThrow(() -> new EntityNotFoundException("Invalid userId: " + secondUserId));
+
+    UserConnectionEntity userConnectionEntity = userConnectionRepository
+        .findByPartnerAUserIdAndPartnerBUserIdAndStatus(
+            firstUserId,
+            secondUserId, UserConnectionsStatus.ACCEPTED)
+        .orElseThrow(() -> new EntityNotFoundException("Invalid status."));
+
+    int firstConnectionCount = firstUserEntity.getConnectionCount();
+    if (firstConnectionCount <= 0) {
+      throw new IllegalStateException("Count is already zero. userId: " + firstUserId);
+    }
+
+    int secondConnectionCount = secondUserEntity.getConnectionCount();
+    if (secondConnectionCount <= 0) {
+      throw new IllegalStateException("Count is already zero. userId: " + secondUserId);
+    }
+
+    firstUserEntity.setConnectionCount(firstConnectionCount - 1);
+    secondUserEntity.setConnectionCount(secondConnectionCount - 1);
+    userConnectionEntity.setStatus(UserConnectionsStatus.DISCONNECTED);
+  }
+
   public int getLimitConnections() {
     return limitConnections;
   }
