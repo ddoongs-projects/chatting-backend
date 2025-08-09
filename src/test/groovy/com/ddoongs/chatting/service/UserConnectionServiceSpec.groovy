@@ -30,6 +30,7 @@ class UserConnectionServiceSpec extends Specification {
         given:
         userService.getUser(inviteCodeOfTargetUser) >> Optional.of(new User(targetUserId, targetUsername))
         userService.getUsername(senderUserId) >> Optional.of(senderUsername)
+        userService.getConnectionCount(senderUserId) >> { senderUserId.id() != 8 ? Optional.of(0) : Optional.of(1_000) }
         userConnectionRepository.findStatusByPartnerAUserIdAndPartnerBUserId(_ as Long, _ as Long) >> {
             Optional.of(Stub(UserConnectionStatusProjection) {
                 getStatus() >> beforeConnectionStatus.name()
@@ -54,6 +55,7 @@ class UserConnectionServiceSpec extends Specification {
         'After Disconnected'  | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | new InviteCode('user2code') | new InviteCode('user2code')  | UserConnectionsStatus.DISCONNECTED | Pair.of(Optional.of(new UserId(2)), 'userA')
         'Invalid Invite Code' | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | new InviteCode('user2code') | new InviteCode('nobodycode') | UserConnectionsStatus.DISCONNECTED | Pair.of(Optional.empty(), "Invalid invite code")
         'Self Invite Code'    | new UserId(1) | 'userA'        | new UserId(1) | 'userA'        | new InviteCode('user1code') | new InviteCode('user1code')  | UserConnectionsStatus.DISCONNECTED | Pair.of(Optional.empty(), "Can't self invite")
+        'Limit reached'       | new UserId(8) | 'userH'        | new UserId(9) | 'userI'        | new InviteCode('user9code') | new InviteCode('user9code')  | UserConnectionsStatus.NONE         | Pair.of(Optional.empty(), "Connection limit reached")
     }
 
     def "사용자 연결 신청 수락에 대한 테스트"() {
@@ -103,7 +105,41 @@ class UserConnectionServiceSpec extends Specification {
         'Accept invalid invite'           | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | Optional.empty()           | UserConnectionsStatus.NONE         | Pair.of(Optional.empty(), 'Invalid username')
         'Already rejected'                | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | Optional.of(new UserId(2)) | UserConnectionsStatus.REJECTED     | Pair.of(Optional.empty(), 'Accept failed')
         'After disconnected'              | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | Optional.of(new UserId(2)) | UserConnectionsStatus.DISCONNECTED | Pair.of(Optional.empty(), 'Accept failed')
-        'Limit reached'                   | new UserId(5) | 'userE'        | new UserId(6) | 'userF'        | Optional.of(new UserId(6)) | UserConnectionsStatus.PENDING      | Pair.of(Optional.empty(), 'Accept failed')
-        'Limit reached by the other user' | new UserId(8) | 'userI'        | new UserId(7) | 'userH'        | Optional.of(new UserId(7)) | UserConnectionsStatus.PENDING      | Pair.of(Optional.empty(), 'Accept failed')
+        'Limit reached'                   | new UserId(5) | 'userE'        | new UserId(6) | 'userF'        | Optional.of(new UserId(6)) | UserConnectionsStatus.PENDING      | Pair.of(Optional.empty(), 'Connection limit reached')
+        'Limit reached by the other user' | new UserId(8) | 'userI'        | new UserId(7) | 'userH'        | Optional.of(new UserId(7)) | UserConnectionsStatus.PENDING      | Pair.of(Optional.empty(), 'Connection limit reached by the other user')
+    }
+
+    def "사용자 연결 신청 거부에 대한 테스트"() {
+        given:
+        userService.getUserId(targetUsername) >> Optional.of(targetUserId)
+        userService.getUsername(senderUserId) >> Optional.of(senderUsername)
+        userConnectionRepository.findStatusByPartnerAUserIdAndPartnerBUserId(_ as Long, _ as Long) >> {
+            Optional.of(Stub(UserConnectionStatusProjection) {
+                getStatus() >> beforeConnectionStatus.name()
+            })
+        }
+        userConnectionRepository.findInviterUserIdByPartnerAUserIdAndPartnerBUserId(_ as Long, _ as Long) >> {
+            inviterUserId.flatMap { UserId inviter ->
+                Optional.of(Stub(InviterUserIdProjection) {
+                    getInviterUserId() >> inviter.id()
+                })
+            }
+        }
+
+        when:
+        def result = userConnectionService.reject(senderUserId, targetUsername)
+
+
+        then:
+        result == expectedResult
+
+        where:
+        scenario                | senderUserId  | senderUsername | targetUserId  | targetUsername | inviterUserId              | beforeConnectionStatus             | expectedResult
+        'Reject Invite'         | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | Optional.of(new UserId(2)) | UserConnectionsStatus.PENDING      | Pair.of(true, 'userB')
+        'Already Rejected'      | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | Optional.of(new UserId(2)) | UserConnectionsStatus.REJECTED     | Pair.of(false, 'Reject failed')
+        'Self Reject'           | new UserId(1) | 'userA'        | new UserId(1) | 'userA'        | Optional.of(new UserId(1)) | UserConnectionsStatus.PENDING      | Pair.of(false, 'Reject failed')
+        'Reject Wrong Invite'   | new UserId(1) | 'userA'        | new UserId(4) | 'userD'        | Optional.of(new UserId(2)) | UserConnectionsStatus.NONE         | Pair.of(false, 'Reject failed')
+        'Reject Invalid Invite' | new UserId(1) | 'userA'        | new UserId(4) | 'userD'        | Optional.empty()           | UserConnectionsStatus.NONE         | Pair.of(false, 'Reject failed')
+        'After Disconnected'    | new UserId(1) | 'userA'        | new UserId(2) | 'userB'        | Optional.of(new UserId(2)) | UserConnectionsStatus.DISCONNECTED | Pair.of(false, 'Reject failed')
     }
 }
