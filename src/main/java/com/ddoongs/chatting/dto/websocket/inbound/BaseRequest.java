@@ -8,8 +8,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = ChatRequest.class, name = MessageType.CHAT),
+    @JsonSubTypes.Type(value = WriteChatRequest.class, name = MessageType.WRITE_CHAT),
     @JsonSubTypes.Type(value = KeepAliveRequest.class, name = MessageType.KEEP_ALIVE),
+    @JsonSubTypes.Type(value = InviteRequest.class, name = MessageType.INVITE_REQUEST),
 })
 public class BaseRequest {
 

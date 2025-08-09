@@ -4,15 +4,15 @@ import com.ddoongs.chatting.constants.MessageType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ChatRequest extends BaseRequest {
+public class WriteChatRequest extends BaseRequest {
 
   private final String username;
   private final String content;
 
   @JsonCreator
-  public ChatRequest(@JsonProperty("username") String username,
+  public WriteChatRequest(@JsonProperty("username") String username,
       @JsonProperty("content") String content) {
-    super(MessageType.CHAT);
+    super(MessageType.WRITE_CHAT);
     this.username = username;
     this.content = content;
   }
