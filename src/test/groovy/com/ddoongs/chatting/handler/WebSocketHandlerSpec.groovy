@@ -1,7 +1,7 @@
 package com.ddoongs.chatting.handler
 
 import com.ddoongs.chatting.ChattingApplication
-import com.ddoongs.chatting.dto.websocket.inbound.ChatRequest
+import com.ddoongs.chatting.dto.websocket.inbound.WriteChatRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
         classes = ChattingApplication,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class ChatHandlerSpec extends Specification {
+class WebSocketHandlerSpec extends Specification {
 
     @LocalServerPort
     int port
@@ -45,9 +45,9 @@ class ChatHandlerSpec extends Specification {
         def (clientA, clientB, clientC) = [createClient(sessionIdA), createClient(sessionIdB), createClient(sessionIdC)]
 
         when:
-        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new ChatRequest("clientA", "안녕하세요. A 입니다."))))
-        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new ChatRequest("clientB", "안녕하세요. B 입니다."))))
-        clientC.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new ChatRequest("clientC", "안녕하세요. C 입니다."))))
+        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChatRequest("clientA", "안녕하세요. A 입니다."))))
+        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChatRequest("clientB", "안녕하세요. B 입니다."))))
+        clientC.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChatRequest("clientC", "안녕하세요. C 입니다."))))
 
         then:
         def resultA = clientA.queue.poll(1, TimeUnit.SECONDS) + clientA.queue.poll(1, TimeUnit.SECONDS)
