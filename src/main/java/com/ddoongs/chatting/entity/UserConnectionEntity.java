@@ -27,19 +27,19 @@ public class UserConnectionEntity extends BaseEntity {
   @Column(name = "status", nullable = false)
   private UserConnectionsStatus status;
 
-  @Column(name = "invite_user_id", nullable = false)
-  private Long inviteUserId;
+  @Column(name = "inviter_user_id", nullable = false)
+  private Long inviterUserId;
 
   protected UserConnectionEntity() {
   }
 
   public UserConnectionEntity(Long partnerAUserId, Long partnerBUserId,
       UserConnectionsStatus status,
-      Long inviteUserId) {
+      Long inviterUserId) {
     this.partnerAUserId = partnerAUserId;
     this.partnerBUserId = partnerBUserId;
     this.status = status;
-    this.inviteUserId = inviteUserId;
+    this.inviterUserId = inviterUserId;
   }
 
   public Long getPartnerAUserId() {
@@ -58,8 +58,8 @@ public class UserConnectionEntity extends BaseEntity {
     this.status = status;
   }
 
-  public Long getInviteUserId() {
-    return inviteUserId;
+  public Long getInviterUserId() {
+    return inviterUserId;
   }
 
   @Override
@@ -83,6 +83,6 @@ public class UserConnectionEntity extends BaseEntity {
   @Override
   public String toString() {
     return "UserConnectionEntity{partnerAUserId=%d, partnerBUserId=%d, status=%s, inviteUserId=%d}"
-        .formatted(partnerAUserId, partnerBUserId, status, inviteUserId);
+        .formatted(partnerAUserId, partnerBUserId, status, inviterUserId);
   }
 }

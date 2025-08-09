@@ -8,6 +8,9 @@ public class UserConnectionId implements Serializable {
   private Long partnerAUserId;
   private Long partnerBUserId;
 
+  protected UserConnectionId() {
+  }
+
   public UserConnectionId(Long partnerAUserId, Long partnerBUserId) {
     this.partnerAUserId = partnerAUserId;
     this.partnerBUserId = partnerBUserId;
