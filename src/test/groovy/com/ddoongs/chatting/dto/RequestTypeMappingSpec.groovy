@@ -1,9 +1,6 @@
 package com.ddoongs.chatting.dto
 
-import com.ddoongs.chatting.dto.websocket.inbound.BaseRequest
-import com.ddoongs.chatting.dto.websocket.inbound.InviteRequest
-import com.ddoongs.chatting.dto.websocket.inbound.KeepAliveRequest
-import com.ddoongs.chatting.dto.websocket.inbound.WriteChatRequest
+import com.ddoongs.chatting.dto.websocket.inbound.*
 import com.ddoongs.chatting.json.JsonUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import spock.lang.Specification
@@ -30,5 +27,6 @@ class RequestTypeMappingSpec extends Specification {
         '{"type": "INVITE_REQUEST", "userInviteCode": "TestInviteCode123"}'        | InviteRequest    | { req -> { (req as InviteRequest).userInviteCode.code() == "TestInviteCode123" } }
         '{"type": "WRITE_CHAT", "username": "testuser", "content": "testmessage"}' | WriteChatRequest | { req -> { (req as WriteChatRequest).content == "testmessage" } }
         '{"type": "KEEP_ALIVE"}'                                                   | KeepAliveRequest | { req -> { (req as KeepAliveRequest).getType() == "KEEP_ALIVE" } }
+        '{"type": "ACCEPT_REQUEST", "username": "testuser"}'                       | AcceptRequest    | { req -> { (req as AcceptRequest).getUsername() == "testuser" } }
     }
 }
