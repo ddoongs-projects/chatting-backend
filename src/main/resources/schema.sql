@@ -12,16 +12,16 @@ CREATE TABLE IF NOT EXISTS chat
 
 CREATE TABLE IF NOT EXISTS chat_user
 (
-    user_id            BIGINT AUTO_INCREMENT,
-    username           VARCHAR(20)  NOT NULL,
-    password           VARCHAR(255) NOT NULL,
-    friend_invite_code VARCHAR(20)  NOT NULL,
-    friend_count       INT          NOT NULL,
-    created_at         TIMESTAMP    NOT NULL,
-    updated_at         TIMESTAMP    NOT NULL,
+    user_id                BIGINT AUTO_INCREMENT,
+    username               VARCHAR(20)  NOT NULL,
+    password               VARCHAR(255) NOT NULL,
+    connection_invite_code VARCHAR(32)  NOT NULL,
+    connection_count       INT          NOT NULL,
+    created_at             TIMESTAMP    NOT NULL,
+    updated_at             TIMESTAMP    NOT NULL,
     PRIMARY KEY (user_id),
     CONSTRAINT unique_username UNIQUE (username),
-    CONSTRAINT unique_friend_invite_code UNIQUE (friend_invite_code)
+    CONSTRAINT unique_friend_invite_code UNIQUE (connection_invite_code)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS user_connection
 (
     partner_a_user_id BIGINT      NOT NULL,
     partner_b_user_id BIGINT      NOT NULL,
-    status            VARCHAR(20) NOT NULL,
+    status            VARCHAR(32) NOT NULL,
     inviter_user_id   BIGINT      NOT NULL,
     created_at        TIMESTAMP   NOT NULL,
     updated_at        TIMESTAMP   NOT NULL,
