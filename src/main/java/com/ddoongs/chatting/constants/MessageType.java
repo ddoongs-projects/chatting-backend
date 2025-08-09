@@ -4,10 +4,13 @@ public class MessageType {
 
   public static final String INVITE_REQUEST = "INVITE_REQUEST";
   public static final String INVITE_RESPONSE = "INVITE_RESPONSE";
+  public static final String ACCEPT_REQUEST = "ACCEPT_REQUEST";
+  public static final String ACCEPT_RESPONSE = "ACCEPT_RESPONSE";
   public static final String WRITE_CHAT = "WRITE_CHAT";
 
   // Notification
   public static final String ASK_INVITE = "ASK_INVITE";
+  public static final String NOTIFY_ACCEPT = "NOTIFY_ACCEPT";
   public static final String NOTIFY_CHAT = "NOTIFY_CHAT";
   public static final String KEEP_ALIVE = "KEEP_ALIVE";
   public static final String ERROR = "ERROR";
