@@ -61,8 +61,8 @@ class WebSocketHandlerSpec extends Specification {
         channelService.isOnline(_ as UserId, _ as ChannelId) >> true
 
         when:
-        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat(new ChannelId(1), "clientA", "안녕하세요. A 입니다."))))
-        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat(new ChannelId(1), "clientB", "안녕하세요. B 입니다."))))
+        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat(new ChannelId(1), "안녕하세요. A 입니다."))))
+        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat(new ChannelId(1), "안녕하세요. B 입니다."))))
 
 
         then:
