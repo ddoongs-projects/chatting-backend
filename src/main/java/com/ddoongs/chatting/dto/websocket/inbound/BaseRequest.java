@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
     @JsonSubTypes.Type(value = WriteChatRequest.class, name = MessageType.WRITE_CHAT),
     @JsonSubTypes.Type(value = KeepAliveRequest.class, name = MessageType.KEEP_ALIVE),
 })
-public class BaseRequest {
+public abstract class BaseRequest {
 
   private final String type;
 

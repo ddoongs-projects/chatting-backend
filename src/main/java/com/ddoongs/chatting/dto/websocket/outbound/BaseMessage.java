@@ -7,4 +7,8 @@ public abstract class BaseMessage {
   public BaseMessage(String type) {
     this.type = type;
   }
+
+  public String getType() {
+    return type;
+  }
 }
