@@ -1,6 +1,7 @@
 package com.ddoongs.chatting.service;
 
 import com.ddoongs.chatting.constants.ResultType;
+import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.domain.Channel;
 import com.ddoongs.chatting.dto.domain.ChannelId;
 import com.ddoongs.chatting.dto.domain.UserId;
@@ -56,6 +57,12 @@ public class ChannelService {
     if (title == null || title.isEmpty()) {
       log.warn("Invalid args: title is empty");
       return Pair.of(Optional.empty(), ResultType.INVALID_ARGS);
+    }
+
+    if (userConnectionService.getStatus(senderUserId, participantId)
+        != UserConnectionsStatus.ACCEPTED) {
+      log.warn("Included unconnected user. participantId: {}", participantId);
+      return Pair.of(Optional.empty(), ResultType.NOT_ALLOWED);
     }
 
     try {
