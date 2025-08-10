@@ -17,8 +17,8 @@ public class ChatEntity extends BaseEntity {
   @Column(name = "chat_sequence")
   private Long chatSequence;
 
-  @Column(name = "user_name", nullable = false)
-  private String username;
+  @Column(name = "user_id", nullable = false)
+  private Long userId;
 
   @Column(name = "content", nullable = false)
   private String content;
@@ -27,8 +27,8 @@ public class ChatEntity extends BaseEntity {
   protected ChatEntity() {
   }
 
-  public ChatEntity(String username, String content) {
-    this.username = username;
+  public ChatEntity(Long userId, String content) {
+    this.userId = userId;
     this.content = content;
   }
 
@@ -51,7 +51,7 @@ public class ChatEntity extends BaseEntity {
 
   @Override
   public String toString() {
-    return "ChatEntity{chatSequence=%d, username='%s', content='%s', createdAt=%s, updatedAt=%s}".formatted(
-        chatSequence, username, content, this.getCreatedAt(), this.getUpdatedAt());
+    return "ChatEntity{chatSequence=%d, userId=%d, content='%s'}"
+        .formatted(chatSequence, userId, content);
   }
 }

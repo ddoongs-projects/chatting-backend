@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS chat
 (
     chat_sequence BIGINT AUTO_INCREMENT,
-    user_name     VARCHAR(20)   NOT NULL,
+    user_id       BIGINT        NOT NULL,
     content       VARCHAR(1000) NOT NULL,
     created_at    TIMESTAMP     NOT NULL,
     updated_at    TIMESTAMP     NOT NULL,
@@ -21,12 +21,11 @@ CREATE TABLE IF NOT EXISTS chat_user
     updated_at             TIMESTAMP    NOT NULL,
     PRIMARY KEY (user_id),
     CONSTRAINT unique_username UNIQUE (username),
-    CONSTRAINT unique_friend_invite_code UNIQUE (connection_invite_code)
+    CONSTRAINT unique_connection_invite_code UNIQUE (connection_invite_code)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
-DROP TABLE user_connection;
 CREATE TABLE IF NOT EXISTS user_connection
 (
     partner_a_user_id BIGINT      NOT NULL,
@@ -37,10 +36,39 @@ CREATE TABLE IF NOT EXISTS user_connection
     updated_at        TIMESTAMP   NOT NULL,
 
     PRIMARY KEY (partner_a_user_id, partner_b_user_id),
-    INDEX idx_friend_b_user_id (partner_b_user_id),
-    INDEX idx_friend_a_user_id (partner_a_user_id),
-    INDEX idx_friend_b_user_id_status (partner_b_user_id, status),
-    INDEX idx_friend_a_user_id_status (partner_a_user_id, status)
+    INDEX idx_partner_b_user_id (partner_b_user_id),
+    INDEX idx_partner_a_user_id (partner_a_user_id),
+    INDEX idx_partner_b_user_id_status (partner_b_user_id, status),
+    INDEX idx_partner_a_user_id_status (partner_a_user_id, status)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS channel
+(
+    channel_id          BIGINT AUTO_INCREMENT,
+    title               VARCHAR(20) NOT NULL,
+    channel_invite_code VARCHAR(32) NOT NULL,
+    head_count          INT         NOT NULL,
+    created_at          TIMESTAMP   NOT NULL,
+    updated_at          TIMESTAMP   NOT NULL,
+
+    PRIMARY KEY (channel_id),
+    CONSTRAINT unique_channel_invite_code UNIQUE (channel_invite_code)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS user_channel
+(
+    user_id               BIGINT    NOT NULL,
+    channel_id            BIGINT    NOT NULL,
+    last_read_message_seq BIGINT    NOT NULL,
+    created_at            TIMESTAMP NOT NULL,
+    updated_at            TIMESTAMP NOT NULL,
+
+    PRIMARY KEY (user_id, channel_id),
+    INDEX idx_channel_id (channel_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
