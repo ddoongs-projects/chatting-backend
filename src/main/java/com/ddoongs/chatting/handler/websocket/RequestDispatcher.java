@@ -14,15 +14,15 @@ import org.springframework.web.socket.WebSocketSession;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Component
-public class RequestHandlerDispatcher {
+public class RequestDispatcher {
 
-  private static final Logger log = LoggerFactory.getLogger(RequestHandlerDispatcher.class);
+  private static final Logger log = LoggerFactory.getLogger(RequestDispatcher.class);
 
   private final Map<Class<? extends BaseRequest>, BaseRequestHandler<? extends BaseRequest>> handlerMap = new HashMap<>();
 
   private final ListableBeanFactory listableBeanFactory;
 
-  public RequestHandlerDispatcher(ListableBeanFactory listableBeanFactory) {
+  public RequestDispatcher(ListableBeanFactory listableBeanFactory) {
     this.listableBeanFactory = listableBeanFactory;
   }
 
@@ -35,6 +35,7 @@ public class RequestHandlerDispatcher {
 
     if (handler != null) {
       handler.handleRequest(webSocketSession, request);
+      return;
     }
 
     log.error("Handler not found for request type: {}", request.getClass().getSimpleName());

@@ -3,7 +3,7 @@ package com.ddoongs.chatting.handler;
 import com.ddoongs.chatting.constants.Constants;
 import com.ddoongs.chatting.dto.domain.UserId;
 import com.ddoongs.chatting.dto.websocket.inbound.BaseRequest;
-import com.ddoongs.chatting.handler.websocket.RequestHandlerDispatcher;
+import com.ddoongs.chatting.handler.websocket.RequestDispatcher;
 import com.ddoongs.chatting.json.JsonUtils;
 import com.ddoongs.chatting.session.WebSocketSessionManager;
 import org.slf4j.Logger;
@@ -23,13 +23,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
   private final JsonUtils jsonUtils;
   private final WebSocketSessionManager webSocketSessionManager;
-  private final RequestHandlerDispatcher requestHandlerDispatcher;
+  private final RequestDispatcher requestDispatcher;
 
   public WebSocketHandler(JsonUtils jsonUtils, WebSocketSessionManager webSocketSessionManager,
-      RequestHandlerDispatcher requestHandlerDispatcher) {
+      RequestDispatcher requestDispatcher) {
     this.jsonUtils = jsonUtils;
     this.webSocketSessionManager = webSocketSessionManager;
-    this.requestHandlerDispatcher = requestHandlerDispatcher;
+    this.requestDispatcher = requestDispatcher;
   }
 
   @Override
@@ -65,7 +65,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     String payload = message.getPayload();
     jsonUtils.fromJson(payload, BaseRequest.class)
-        .ifPresent(request -> requestHandlerDispatcher.dispatchRequest(senderSession, request));
+        .ifPresent(request -> requestDispatcher.dispatchRequest(senderSession, request));
 
   }
 
