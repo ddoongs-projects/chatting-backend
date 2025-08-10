@@ -39,7 +39,7 @@ public interface UserConnectionRepository extends
       @Param("status") UserConnectionsStatus status);
 
   @Query(
-      "SELECT u.partnerAUserId AS userId, userA.username AS username, u.inviterUserId AS InviterUserId  "
+      "SELECT u.partnerAUserId AS userId, userA.username AS username, u.inviterUserId AS inviterUserId  "
       + "FROM UserConnectionEntity u "
       + "INNER JOIN UserEntity userA "
       + "ON u.partnerAUserId = userA.userId "
