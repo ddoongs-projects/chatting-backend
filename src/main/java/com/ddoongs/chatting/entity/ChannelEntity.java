@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "channel")
@@ -32,6 +33,7 @@ public class ChannelEntity extends BaseEntity {
   public ChannelEntity(String title, int headCount) {
     this.title = title;
     this.headCount = headCount;
+    this.channelInviteCode = UUID.randomUUID().toString().replace("-", "");
   }
 
   @Override
