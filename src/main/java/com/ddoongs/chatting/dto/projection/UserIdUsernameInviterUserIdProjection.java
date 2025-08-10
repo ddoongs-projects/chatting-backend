@@ -6,4 +6,5 @@ public interface UserIdUsernameProjection {
 
   String getUsername();
 
+  Long getInviterUserId();
 }

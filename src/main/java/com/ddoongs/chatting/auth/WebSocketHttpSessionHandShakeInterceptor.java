@@ -48,7 +48,7 @@ public class WebSocketHttpSessionHandShakeInterceptor extends HttpSessionHandsha
       ChatUserDetails chatUserDetails = (ChatUserDetails) authentication.getPrincipal();
       attributes.put(Constants.HTTP_SESSION_ID.getValue(), httpSession.getId());
       attributes.put(Constants.USER_ID.getValue(), new UserId(chatUserDetails.getUserId()));
-      return false;
+      return true;
     }
 
     log.info("WebSocket handshake failed. request: {}", request.getClass());
