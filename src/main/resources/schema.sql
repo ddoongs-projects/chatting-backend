@@ -1,4 +1,3 @@
-DROP TABLE chat;
 CREATE TABLE IF NOT EXISTS chat
 (
     chat_sequence BIGINT AUTO_INCREMENT,
@@ -11,7 +10,6 @@ CREATE TABLE IF NOT EXISTS chat
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
-DROP TABLE chat_user;
 CREATE TABLE IF NOT EXISTS chat_user
 (
     user_id                BIGINT AUTO_INCREMENT,
