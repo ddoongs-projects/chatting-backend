@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.handler.websocket;
 
-import com.ddoongs.chatting.constants.Constants;
+import com.ddoongs.chatting.constants.IdKey;
 import com.ddoongs.chatting.constants.MessageType;
 import com.ddoongs.chatting.dto.domain.UserId;
 import com.ddoongs.chatting.dto.websocket.inbound.AcceptInviteRequest;
@@ -29,7 +29,7 @@ public class AcceptInviteRequestHandler implements BaseRequestHandler<AcceptInvi
   @Override
   public void handleRequest(WebSocketSession senderSession, AcceptInviteRequest request) {
     UserId acceptorUserId =
-        (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+        (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
     Pair<Optional<UserId>, String> result = userConnectionService.accept(acceptorUserId,
         request.getUsername());
 

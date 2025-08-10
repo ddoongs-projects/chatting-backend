@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.handler.websocket;
 
-import com.ddoongs.chatting.constants.Constants;
+import com.ddoongs.chatting.constants.IdKey;
 import com.ddoongs.chatting.constants.MessageType;
 import com.ddoongs.chatting.dto.domain.UserId;
 import com.ddoongs.chatting.dto.websocket.inbound.FetchUserInviteCodeRequest;
@@ -31,7 +31,7 @@ public class FetchUserInviteCodeRequestHandler implements
 
   @Override
   public void handleRequest(WebSocketSession senderSession, FetchUserInviteCodeRequest request) {
-    UserId senderUserId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+    UserId senderUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
     userService.getInviteCode(senderUserId).ifPresentOrElse((inviteCode) -> {
       webSocketSessionManager.sendMessage(senderSession,
           new FetchUserInviteCodeResponse(inviteCode));

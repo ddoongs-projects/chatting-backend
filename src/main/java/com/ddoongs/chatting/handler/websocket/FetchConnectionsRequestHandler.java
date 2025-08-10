@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.handler.websocket;
 
-import com.ddoongs.chatting.constants.Constants;
+import com.ddoongs.chatting.constants.IdKey;
 import com.ddoongs.chatting.dto.domain.Connection;
 import com.ddoongs.chatting.dto.domain.UserId;
 import com.ddoongs.chatting.dto.websocket.inbound.FetchConnectionsRequest;
@@ -31,7 +31,7 @@ public class FetchConnectionsRequestHandler implements
 
   @Override
   public void handleRequest(WebSocketSession senderSession, FetchConnectionsRequest request) {
-    UserId senderUserId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+    UserId senderUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
     List<Connection> connections = userConnectionService.getUsersByStatus(senderUserId,
             request.getStatus()).stream()
         .map(user -> new Connection(user.username(), request.getStatus()))

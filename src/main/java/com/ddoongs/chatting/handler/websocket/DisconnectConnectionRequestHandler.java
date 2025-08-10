@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.handler.websocket;
 
-import com.ddoongs.chatting.constants.Constants;
+import com.ddoongs.chatting.constants.IdKey;
 import com.ddoongs.chatting.constants.MessageType;
 import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.domain.UserId;
@@ -33,7 +33,7 @@ public class DisconnectConnectionRequestHandler implements
 
   @Override
   public void handleRequest(WebSocketSession senderSession, DisconnectConnectionRequest request) {
-    UserId senderUserId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+    UserId senderUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
     Pair<Boolean, String> result =
         userConnectionService.disconnect(senderUserId, request.getUsername());
     if (result.getFirst()) {
