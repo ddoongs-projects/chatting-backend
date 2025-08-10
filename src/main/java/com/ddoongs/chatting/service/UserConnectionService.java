@@ -4,7 +4,7 @@ import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.domain.InviteCode;
 import com.ddoongs.chatting.dto.domain.User;
 import com.ddoongs.chatting.dto.domain.UserId;
-import com.ddoongs.chatting.dto.projection.UserIdUsernameProjection;
+import com.ddoongs.chatting.dto.projection.UserIdUsernameInviterUserIdProjection;
 import com.ddoongs.chatting.entity.UserConnectionEntity;
 import com.ddoongs.chatting.repository.UserConnectionRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,14 +35,21 @@ public class UserConnectionService {
   }
 
   public List<User> getUsersByStatus(UserId userId, UserConnectionsStatus status) {
-    List<UserIdUsernameProjection> usersA = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(
+    List<UserIdUsernameInviterUserIdProjection> usersA = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(
         userId.id(), status);
-    List<UserIdUsernameProjection> usersB = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(
+    List<UserIdUsernameInviterUserIdProjection> usersB = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(
         userId.id(), status);
 
-    return Stream.concat(usersA.stream(), usersB.stream())
-        .map(item -> new User(new UserId(item.getUserId()), item.getUsername()))
-        .toList();
+    if (status == UserConnectionsStatus.ACCEPTED) {
+      return Stream.concat(usersA.stream(), usersB.stream())
+          .map(item -> new User(new UserId(item.getUserId()), item.getUsername()))
+          .toList();
+    } else {
+      return Stream.concat(usersA.stream(), usersB.stream())
+          .filter(item -> !item.getInviterUserId().equals(userId.id()))
+          .map(item -> new User(new UserId(item.getUserId()), item.getUsername()))
+          .toList();
+    }
   }
 
   public Pair<Optional<UserId>, String> invite(UserId inviterUserId, InviteCode inviteCode) {
@@ -144,7 +151,7 @@ public class UserConnectionService {
                 invitationSenderUserId ->
                     invitationSenderUserId.equals(inviterUserId)).isPresent())
         .filter(inviterUserId -> getStatus(inviterUserId, senderUserId)
-            == UserConnectionsStatus.PENDING)
+                                 == UserConnectionsStatus.PENDING)
         .map(inviterUserId -> {
           try {
             setStatus(inviterUserId, senderUserId, UserConnectionsStatus.REJECTED);
@@ -166,7 +173,7 @@ public class UserConnectionService {
               userConnectionLimitService.disconnect(senderUserId, partnerUserId);
               return Pair.of(true, partnerUsername);
             } else if (status == UserConnectionsStatus.REJECTED
-                && getInviterUserId(senderUserId, partnerUserId).filter(
+                       && getInviterUserId(senderUserId, partnerUserId).filter(
                 inviteUserId -> inviteUserId.equals(partnerUserId)).isPresent()) {
               setStatus(senderUserId, partnerUserId, UserConnectionsStatus.DISCONNECTED);
               return Pair.of(true, partnerUsername);

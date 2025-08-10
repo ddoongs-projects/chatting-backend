@@ -3,7 +3,7 @@ package com.ddoongs.chatting.repository;
 import com.ddoongs.chatting.constants.UserConnectionsStatus;
 import com.ddoongs.chatting.dto.projection.InviterUserIdProjection;
 import com.ddoongs.chatting.dto.projection.UserConnectionStatusProjection;
-import com.ddoongs.chatting.dto.projection.UserIdUsernameProjection;
+import com.ddoongs.chatting.dto.projection.UserIdUsernameInviterUserIdProjection;
 import com.ddoongs.chatting.entity.UserConnectionEntity;
 import com.ddoongs.chatting.entity.UserConnectionId;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -28,24 +28,24 @@ public interface UserConnectionRepository extends
       @NonNull Long partnerAUserId, @NonNull Long partnerBUserId);
 
   @Query(
-      "SELECT u.partnerBUserId AS userId, userB.username as username "
-          + "FROM UserConnectionEntity u "
-          + "INNER JOIN UserEntity userB "
-          + "ON u.partnerBUserId = userB.userId "
-          + "WHERE u.partnerAUserId = :userId AND u.status = :status"
+      "SELECT u.partnerBUserId AS userId, userB.username AS username, u.inviterUserId AS inviterUserId "
+      + "FROM UserConnectionEntity u "
+      + "INNER JOIN UserEntity userB "
+      + "ON u.partnerBUserId = userB.userId "
+      + "WHERE u.partnerAUserId = :userId AND u.status = :status"
   )
-  List<UserIdUsernameProjection> findConnectionsByPartnerAUserIdAndStatus(
+  List<UserIdUsernameInviterUserIdProjection> findConnectionsByPartnerAUserIdAndStatus(
       @Param("userId") Long userId,
       @Param("status") UserConnectionsStatus status);
 
   @Query(
-      "SELECT u.partnerAUserId AS userId, userA.username as username "
-          + "FROM UserConnectionEntity u "
-          + "INNER JOIN UserEntity userA "
-          + "ON u.partnerAUserId = userA.userId "
-          + "WHERE u.partnerBUserId = :userId AND u.status = :status"
+      "SELECT u.partnerAUserId AS userId, userA.username AS username, u.inviterUserId AS InviterUserId  "
+      + "FROM UserConnectionEntity u "
+      + "INNER JOIN UserEntity userA "
+      + "ON u.partnerAUserId = userA.userId "
+      + "WHERE u.partnerBUserId = :userId AND u.status = :status"
   )
-  List<UserIdUsernameProjection> findConnectionsByPartnerBUserIdAndStatus(
+  List<UserIdUsernameInviterUserIdProjection> findConnectionsByPartnerBUserIdAndStatus(
       @Param("userId") Long userId,
       @Param("status") UserConnectionsStatus status);
 }
