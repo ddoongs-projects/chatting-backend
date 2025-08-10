@@ -33,7 +33,7 @@ class RequestTypeMappingSpec extends Specification {
         '{"type": "ACCEPT_INVITE_REQUEST", "username": "testuser"}'                | AcceptInviteRequest         | { req -> { (req as AcceptInviteRequest).getUsername() == "testuser" } }
         '{"type": "REJECT_INVITE_REQUEST", "username": "testuser"}'                | RejectInviteRequest         | { req -> { (req as RejectInviteRequest).getUsername() == "testuser" } }
         '{"type": "DISCONNECT_CONNECTION_REQUEST", "username": "testuser"}'        | DisconnectConnectionRequest | { req -> { (req as DisconnectConnectionRequest).getUsername() == "testuser" } }
-        '{"type": "WRITE_CHAT", "username": "testuser", "content": "testmessage"}' | WriteChatRequest            | { req -> { (req as WriteChatRequest).content == "testmessage" } }
-        '{"type": "KEEP_ALIVE"}'                                                   | KeepAliveRequest            | { req -> { (req as KeepAliveRequest).getType() == MessageType.KEEP_ALIVE } }
+        '{"type": "WRITE_CHAT", "username": "testuser", "content": "testmessage"}' | WriteChat                   | { req -> { (req as WriteChat).content == "testmessage" } }
+        '{"type": "KEEP_ALIVE"}'                                                   | KeepAlive                   | { req -> { (req as KeepAlive).getType() == MessageType.KEEP_ALIVE } }
     }
 }
