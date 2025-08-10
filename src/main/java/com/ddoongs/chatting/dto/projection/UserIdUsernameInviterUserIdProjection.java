@@ -1,6 +1,6 @@
 package com.ddoongs.chatting.dto.projection;
 
-public interface UserIdUsernameProjection {
+public interface UserIdUsernameInviterUserIdProjection {
 
   Long getUserId();
 
