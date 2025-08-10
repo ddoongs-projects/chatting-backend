@@ -48,7 +48,7 @@ public class WebSocketSessionManager {
         log.info("Close Session: {}", userId);
       }
     } catch (IOException e) {
-      log.error("Failed WebSocketSession Clode. userId: {}", userId);
+      log.error("Failed WebSocketSession Close. userId: {}", userId);
     }
   }
 
@@ -57,7 +57,7 @@ public class WebSocketSessionManager {
       try {
         session.sendMessage(new TextMessage(body)); // 스레드 세이프 하지 않음
         log.info("Send Chat: [{}] to {}", body, session.getId());
-      } catch (IOException ex) {
+      } catch (Exception ex) {
         log.error("메세지 전송 실패. error: {}", ex.getMessage());
       }
     });
