@@ -1,8 +1,13 @@
-package com.ddoongs.chatting.handler
+package com.ddoongs.chatting.integration
 
 import com.ddoongs.chatting.ChattingApplication
+import com.ddoongs.chatting.dto.domain.ChannelId
+import com.ddoongs.chatting.dto.domain.UserId
 import com.ddoongs.chatting.dto.websocket.inbound.WriteChat
+import com.ddoongs.chatting.service.ChannelService
+import com.ddoongs.chatting.service.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -33,43 +38,51 @@ class WebSocketHandlerSpec extends Specification {
     @Autowired
     ObjectMapper objectMapper
 
+    @Autowired
+    UserService userService
+
+    @SpringBean
+    ChannelService channelService = Stub()
+
     def "Group Chat Basic Test"() {
         given:
         register("clientA", "testpassA")
         register("clientB", "testpassB")
-        register("clientC", "testpassC")
 
         def sessionIdA = login("clientA", "testpassA")
         def sessionIdB = login("clientB", "testpassB")
-        def sessionIdC = login("clientC", "testpassC")
-        def (clientA, clientB, clientC) = [createClient(sessionIdA), createClient(sessionIdB), createClient(sessionIdC)]
+
+        def (clientA, clientB) = [createClient(sessionIdA), createClient(sessionIdB)]
+
+        channelService.getParticipantIds(_ as ChannelId) >>
+                List.of(userService.getUserId("clientA").get(),
+                        userService.getUserId("clientB").get())
+
+        channelService.isOnline(_ as UserId, _ as ChannelId) >> true
 
         when:
-        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat("clientA", "안녕하세요. A 입니다."))))
-        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat("clientB", "안녕하세요. B 입니다."))))
-        clientC.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat("clientC", "안녕하세요. C 입니다."))))
+        clientA.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat(new ChannelId(1), "clientA", "안녕하세요. A 입니다."))))
+        clientB.session.sendMessage(new TextMessage(objectMapper.writeValueAsString(new WriteChat(new ChannelId(1), "clientB", "안녕하세요. B 입니다."))))
+
 
         then:
-        def resultA = clientA.queue.poll(1, TimeUnit.SECONDS) + clientA.queue.poll(1, TimeUnit.SECONDS)
-        def resultB = clientB.queue.poll(1, TimeUnit.SECONDS) + clientB.queue.poll(1, TimeUnit.SECONDS)
-        def resultC = clientC.queue.poll(1, TimeUnit.SECONDS) + clientC.queue.poll(1, TimeUnit.SECONDS)
+        def resultA = clientA.queue.poll(1, TimeUnit.SECONDS)
+        def resultB = clientB.queue.poll(1, TimeUnit.SECONDS)
 
-        resultA.contains("clientB") && resultA.contains("clientC")
-        resultB.contains("clientC") && resultB.contains("clientA")
-        resultC.contains("clientA") && resultC.contains("clientB")
+        resultA.contains("clientB")
+        resultB.contains("clientA")
+
 
         and:
         clientA.queue.isEmpty()
         clientB.queue.isEmpty()
-        clientC.queue.isEmpty()
+
 
         cleanup:
         unregister(sessionIdA)
         unregister(sessionIdB)
-        unregister(sessionIdC)
         clientA.session?.close()
         clientB.session?.close()
-        clientC.session?.close()
     }
 
     def createClient(String sessionId) {
@@ -111,7 +124,7 @@ class WebSocketHandlerSpec extends Specification {
 
 
     def register(String username, String password) {
-        def url = "http://localhost:${port}/api/v1/auth/unregister"
+        def url = "http://localhost:${port}/api/v1/auth/register"
         def headers = new HttpHeaders(["Content-Type": "application/json"])
         def jsonBody = objectMapper.writeValueAsString([username: username, password: password])
         def httpEntity = new HttpEntity(jsonBody, headers)
