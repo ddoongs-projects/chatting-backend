@@ -7,7 +7,6 @@ import com.ddoongs.chatting.dto.domain.UserId;
 import com.ddoongs.chatting.dto.projection.UserIdUsernameInviterUserIdProjection;
 import com.ddoongs.chatting.entity.UserConnectionEntity;
 import com.ddoongs.chatting.repository.UserConnectionRepository;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -51,6 +50,15 @@ public class UserConnectionService {
           .toList();
     }
   }
+
+  public UserConnectionsStatus getStatus(UserId inviterUserId, UserId partnerUserId) {
+    return userConnectionRepository.findStatusByPartnerAUserIdAndPartnerBUserId(
+            Long.min(inviterUserId.id(), partnerUserId.id()),
+            Long.max(inviterUserId.id(), partnerUserId.id()))
+        .map(projection -> UserConnectionsStatus.valueOf(projection.getStatus()))
+        .orElse(UserConnectionsStatus.NONE);
+  }
+
 
   public Pair<Optional<UserId>, String> invite(UserId inviterUserId, InviteCode inviteCode) {
     Optional<User> partner = userService.getUser(inviteCode);
@@ -135,11 +143,11 @@ public class UserConnectionService {
     try {
       userConnectionLimitService.accept(acceptorUserId, inviterUserId);
       return Pair.of(Optional.of(inviterUserId), acceptorUsername.get());
-    } catch (EntityNotFoundException ex) {
-      log.error("Accept failed. cause: {}", ex.getMessage());
-      return Pair.of(Optional.empty(), "Accept failed");
     } catch (IllegalStateException ex) {
       return Pair.of(Optional.empty(), ex.getMessage());
+    } catch (Exception ex) {
+      log.error("Accept failed. cause: {}", ex.getMessage());
+      return Pair.of(Optional.empty(), "Accept failed");
     }
   }
 
@@ -191,14 +199,6 @@ public class UserConnectionService {
         Long.min(partnerAUserId.id(), partnerBUserId.id()),
         Long.max(partnerAUserId.id(), partnerBUserId.id())
     ).map(inviterUserId -> new UserId(inviterUserId.getInviterUserId()));
-  }
-
-  private UserConnectionsStatus getStatus(UserId inviterUserId, UserId partnerUserId) {
-    return userConnectionRepository.findStatusByPartnerAUserIdAndPartnerBUserId(
-            Long.min(inviterUserId.id(), partnerUserId.id()),
-            Long.max(inviterUserId.id(), partnerUserId.id()))
-        .map(projection -> UserConnectionsStatus.valueOf(projection.getStatus()))
-        .orElse(UserConnectionsStatus.NONE);
   }
 
   @Transactional

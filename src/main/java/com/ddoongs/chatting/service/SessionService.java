@@ -45,6 +45,21 @@ public class SessionService {
     }
   }
 
+  public boolean isOnline(UserId userId, ChannelId channelId) {
+    String channelIdKey = buildChannelIdKey(userId);
+    try {
+      String chId = stringRedisTemplate.opsForValue().get(channelIdKey);
+      if (chId != null && chId.equals(channelId.id().toString())) {
+        return true;
+      }
+    } catch (Exception ex) {
+      log.error("Redis get failed. key: {}, cause: {}", channelIdKey, ex.getMessage());
+      return false;
+    }
+
+    return false;
+  }
+
   public boolean setActiveChannel(UserId userId, ChannelId channelId) {
     String channelIdKey = buildChannelIdKey(userId);
     try {
@@ -53,6 +68,7 @@ public class SessionService {
       return true;
     } catch (Exception ex) {
       log.error("Redis set failed. key: {}, channelId: {}", channelIdKey, channelId.id());
+      return false;
     }
   }
 
