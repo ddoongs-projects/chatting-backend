@@ -11,7 +11,7 @@ public class FetchChannelInviteCodeResponse extends BaseMessage {
 
 
   public FetchChannelInviteCodeResponse(ChannelId channelId, InviteCode inviteCode) {
-    super(MessageType.CREATE_CHANNEL_RESPONSE);
+    super(MessageType.FETCH_CHANNEL_INVITE_CODE_RESPONSE);
     this.channelId = channelId;
     this.inviteCode = inviteCode;
   }
