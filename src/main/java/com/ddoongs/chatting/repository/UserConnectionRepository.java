@@ -7,6 +7,7 @@ import com.ddoongs.chatting.dto.projection.UserIdUsernameInviterUserIdProjection
 import com.ddoongs.chatting.entity.UserConnectionEntity;
 import com.ddoongs.chatting.entity.UserConnectionId;
 import io.lettuce.core.dynamic.annotation.Param;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +27,16 @@ public interface UserConnectionRepository extends
 
   Optional<InviterUserIdProjection> findInviterUserIdByPartnerAUserIdAndPartnerBUserId(
       @NonNull Long partnerAUserId, @NonNull Long partnerBUserId);
+
+  long countByPartnerAUserIdAndPartnerBUserIdInAndStatus(
+      @NonNull Long partnerAUserId,
+      @NonNull Collection<Long> partnerBUserIds,
+      @NonNull UserConnectionsStatus status);
+
+  long countByPartnerBUserIdAndPartnerAUserIdInAndStatus(
+      @NonNull Long partnerBUserId,
+      @NonNull Collection<Long> partnerAUserIds,
+      @NonNull UserConnectionsStatus status);
 
   @Query(
       "SELECT u.partnerBUserId AS userId, userB.username AS username, u.inviterUserId AS inviterUserId "
