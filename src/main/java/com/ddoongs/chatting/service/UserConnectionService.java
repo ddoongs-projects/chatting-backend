@@ -33,6 +33,7 @@ public class UserConnectionService {
     this.userConnectionLimitService = userConnectionLimitService;
   }
 
+  @Transactional(readOnly = true)
   public List<User> getUsersByStatus(UserId userId, UserConnectionsStatus status) {
     List<UserIdUsernameInviterUserIdProjection> usersA = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(
         userId.id(), status);
@@ -59,6 +60,7 @@ public class UserConnectionService {
         .orElse(UserConnectionsStatus.NONE);
   }
 
+  @Transactional(readOnly = true)
   public long countConnectionStatus(UserId senderId, List<UserId> partnerIds,
       UserConnectionsStatus status) {
     List<Long> ids = partnerIds.stream().map(UserId::id).toList();

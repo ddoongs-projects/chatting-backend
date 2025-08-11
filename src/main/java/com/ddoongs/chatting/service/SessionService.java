@@ -83,6 +83,17 @@ public class SessionService {
     }
   }
 
+  public boolean removeActiveChannel(UserId userId) {
+    String channelIdKey = buildChannelIdKey(userId);
+    try {
+      stringRedisTemplate.delete(channelIdKey);
+      return true;
+    } catch (Exception ex) {
+      log.error("Redis delete failed. key: {}", channelIdKey);
+      return false;
+    }
+  }
+
   public String getUsername() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     return authentication.getName();

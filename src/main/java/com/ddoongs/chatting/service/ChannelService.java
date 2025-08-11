@@ -11,6 +11,7 @@ import com.ddoongs.chatting.entity.ChannelEntity;
 import com.ddoongs.chatting.entity.UserChannelEntity;
 import com.ddoongs.chatting.repository.ChannelRepository;
 import com.ddoongs.chatting.repository.UserChannelRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,6 +56,25 @@ public class ChannelService {
     return sessionService.getOnlineParticipantIds(channelId, getParticipantIds(channelId));
   }
 
+  public List<Channel> getChannels(UserId userId) {
+    return userChannelRepository.findChannelsByUserId(userId.id())
+        .stream()
+        .map(projection -> new Channel(
+            new ChannelId(projection.getChannelId()),
+            projection.getTitle(),
+            projection.getHeadCount())
+        ).toList();
+  }
+
+  public Optional<Channel> getChannel(InviteCode inviteCode) {
+    return channelRepository.findChannelCodeByInviteCode(inviteCode.code())
+        .map(projection -> new Channel(
+            new ChannelId(projection.getChannelId()),
+            projection.getTitle(),
+            projection.getHeadCount()
+        ));
+  }
+
   public Optional<InviteCode> getInviteCode(ChannelId channelId) {
     Optional<InviteCode> inviteCode = channelRepository.findInviteCodeByChannelId(channelId.id())
         .map(projection -> new InviteCode(projection.getInviteCode()));
@@ -64,6 +84,35 @@ public class ChannelService {
     }
 
     return inviteCode;
+  }
+
+  @Transactional
+  public Pair<Optional<Channel>, ResultType> join(UserId userId, InviteCode inviteCode) {
+    Optional<Channel> ch = getChannel(inviteCode);
+    if (ch.isEmpty()) {
+      return Pair.of(Optional.empty(), ResultType.NOT_FOUND);
+    }
+
+    Channel channel = ch.get();
+    if (isJoined(userId, channel.channelId())) {
+      return Pair.of(Optional.empty(), ResultType.ALREADY_JOINED);
+    } else if (channel.headCount() >= LIMIT_HEAD_COUNT) {
+      return Pair.of(Optional.empty(), ResultType.OVER_LIMIT);
+    }
+
+    ChannelEntity channelEntity = channelRepository.findForUpdateByChannelId(
+            channel.channelId().id())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Invalid channelId: " + channel.channelId()));
+
+    if (channelEntity.getHeadCount() >= LIMIT_HEAD_COUNT) {
+      return Pair.of(Optional.empty(), ResultType.OVER_LIMIT);
+    }
+
+    channelEntity.setHeadCount(channelEntity.getHeadCount() + 1);
+    channelRepository.save(channelEntity);
+    userChannelRepository.save(new UserChannelEntity(userId.id(), channel.channelId().id(), 0L));
+    return Pair.of(Optional.of(channel), ResultType.SUCCESS);
   }
 
   @Transactional
@@ -130,5 +179,30 @@ public class ChannelService {
 
     log.error("Enter channel failed. userId: {}, channelId: {}", userId, channelId);
     return Pair.of(Optional.empty(), ResultType.FAILED);
+  }
+
+  public boolean leave(UserId userId) {
+    return sessionService.removeActiveChannel(userId);
+  }
+
+  @Transactional
+  public ResultType quit(UserId userId, ChannelId channelId) {
+    if (!isJoined(userId, channelId)) {
+      return ResultType.NOT_JOINED;
+    }
+
+    ChannelEntity channelEntity = channelRepository.findForUpdateByChannelId(
+            channelId.id())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Invalid channelId: " + channelId));
+
+    if (channelEntity.getHeadCount() <= 0) {
+      log.error("Count is already zero. channelId: {}, userId: {}", channelId, userId);
+    }
+
+    channelEntity.setHeadCount(channelEntity.getHeadCount() - 1);
+    channelRepository.save(channelEntity);
+    userChannelRepository.deleteByUserIdAndChannelId(userId.id(), channelId.id());
+    return ResultType.SUCCESS;
   }
 }
