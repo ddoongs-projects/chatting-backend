@@ -16,11 +16,11 @@ public interface UserChannelRepository extends JpaRepository<UserChannelEntity, 
 
   List<UserIdProjection> findUserIdByChannelId(@NonNull Long channelId);
 
-  @Query("SELECT c.channelId AS channelId, c.title as title, c.headCount as hadCount "
+  @Query("SELECT c.channelId AS channelId, c.title as title, c.headCount as headCount "
          + "FROM UserChannelEntity uc "
          + "INNER JOIN ChannelEntity c ON uc.channelId = c.channelId "
          + "WHERE uc.userId = :userId")
-  List<ChannelProjection> findChannelsByUserId(@NonNull @Param("userId") Long userid);
+  List<ChannelProjection> findChannelsByUserId(@NonNull @Param("userId") Long userId);
 
   void deleteByUserIdAndChannelId(@NonNull Long userId, @NonNull Long channelId);
 }
