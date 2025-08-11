@@ -21,8 +21,8 @@ public class ChannelEntity extends BaseEntity {
   @Column(name = "title", nullable = false, length = 20)
   private String title;
 
-  @Column(name = "channel_invite_code", nullable = false, length = 32, unique = true)
-  private String channelInviteCode;
+  @Column(name = "invite_code", nullable = false, length = 32, unique = true)
+  private String inviteCode;
 
   @Column(name = "head_count", nullable = false)
   private int headCount;
@@ -33,7 +33,7 @@ public class ChannelEntity extends BaseEntity {
   public ChannelEntity(String title, int headCount) {
     this.title = title;
     this.headCount = headCount;
-    this.channelInviteCode = UUID.randomUUID().toString().replace("-", "");
+    this.inviteCode = UUID.randomUUID().toString().replace("-", "");
   }
 
   @Override
@@ -55,8 +55,8 @@ public class ChannelEntity extends BaseEntity {
 
   @Override
   public String toString() {
-    return "ChannelEntity{channelId=%d, title='%s', channelInviteCode='%s', headCount=%d, createdAt=%s, updatedAt=%s}"
-        .formatted(channelId, title, channelInviteCode, headCount, this.getCreatedAt(),
+    return "ChannelEntity{channelId=%d, title='%s', inviteCode='%s', headCount=%d, createdAt=%s, updatedAt=%s}"
+        .formatted(channelId, title, inviteCode, headCount, this.getCreatedAt(),
             this.getUpdatedAt());
   }
 
@@ -68,8 +68,8 @@ public class ChannelEntity extends BaseEntity {
     return title;
   }
 
-  public String getChannelInviteCode() {
-    return channelInviteCode;
+  public String getInviteCode() {
+    return inviteCode;
   }
 
   public int getHeadCount() {
