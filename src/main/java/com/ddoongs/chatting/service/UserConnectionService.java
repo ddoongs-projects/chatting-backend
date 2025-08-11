@@ -59,6 +59,18 @@ public class UserConnectionService {
         .orElse(UserConnectionsStatus.NONE);
   }
 
+  public long countConnectionStatus(UserId senderId, List<UserId> partnerIds,
+      UserConnectionsStatus status) {
+    List<Long> ids = partnerIds.stream().map(UserId::id).toList();
+    return userConnectionRepository.countByPartnerAUserIdAndPartnerBUserIdInAndStatus(
+        senderId.id(),
+        ids,
+        status)
+           + userConnectionRepository.countByPartnerBUserIdAndPartnerAUserIdInAndStatus(
+        senderId.id(),
+        ids,
+        status);
+  }
 
   public Pair<Optional<UserId>, String> invite(UserId inviterUserId, InviteCode inviteCode) {
     Optional<User> partner = userService.getUser(inviteCode);

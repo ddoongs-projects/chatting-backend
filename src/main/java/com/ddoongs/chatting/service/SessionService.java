@@ -4,6 +4,9 @@ import com.ddoongs.chatting.constants.IdKey;
 import com.ddoongs.chatting.dto.domain.ChannelId;
 import com.ddoongs.chatting.dto.domain.UserId;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +48,27 @@ public class SessionService {
     }
   }
 
-  public boolean isOnline(UserId userId, ChannelId channelId) {
-    String channelIdKey = buildChannelIdKey(userId);
+
+  public List<UserId> getOnlineParticipantIds(ChannelId channelId, List<UserId> userIds) {
+    List<String> channelIdKeys = userIds.stream().map(this::buildChannelIdKey).toList();
     try {
-      String chId = stringRedisTemplate.opsForValue().get(channelIdKey);
-      if (chId != null && chId.equals(channelId.id().toString())) {
-        return true;
+      List<String> channelIds = stringRedisTemplate.opsForValue().multiGet(channelIdKeys);
+      if (channelIds != null) {
+        List<UserId> onlineParticipantUserIds = new ArrayList<>(channelIds.size());
+        String chId = channelId.id().toString();
+        for (int idx = 0; idx < channelIds.size(); idx++) {
+          String value = channelIds.get(idx);
+          if (value != null && value.equals(chId)) {
+            onlineParticipantUserIds.add(userIds.get(idx));
+          }
+        }
+        return onlineParticipantUserIds;
       }
     } catch (Exception ex) {
-      log.error("Redis get failed. key: {}, cause: {}", channelIdKey, ex.getMessage());
-      return false;
+      log.error("Redis get failed. key: {}, cause: {}", channelIdKeys, ex.getMessage());
     }
 
-    return false;
+    return Collections.emptyList();
   }
 
   public boolean setActiveChannel(UserId userId, ChannelId channelId) {
@@ -78,6 +89,6 @@ public class SessionService {
   }
 
   private String buildChannelIdKey(UserId userId) {
-    return "%s:%d:%s".formatted(NAMESPACE, userId.id(), IdKey.CHANNEL_ID);
+    return "%s:%d:%s".formatted(NAMESPACE, userId.id(), IdKey.CHANNEL_ID.toString());
   }
 }

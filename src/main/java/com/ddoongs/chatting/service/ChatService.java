@@ -4,7 +4,9 @@ import com.ddoongs.chatting.dto.domain.ChannelId;
 import com.ddoongs.chatting.dto.domain.UserId;
 import com.ddoongs.chatting.entity.ChatEntity;
 import com.ddoongs.chatting.repository.ChatRepository;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +15,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChatService {
 
+  private static final int THREAD_POOL_SIZE = 10;
+
   private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
   private final ChannelService channelService;
   private final ChatRepository chatRepository;
+  private final ExecutorService senderThreadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
   public ChatService(ChannelService channelService, ChatRepository chatRepository) {
     this.channelService = channelService;
@@ -32,12 +37,9 @@ public class ChatService {
       return;
     }
 
-    List<UserId> participantIds = channelService.getParticipantIds(channelId);
-    participantIds.stream().filter(userId -> !userId.equals(senderUserId))
-        .forEach(participantId -> {
-          if (channelService.isOnline(participantId, channelId)) {
-            messageSender.accept(participantId);
-          }
-        });
+    channelService.getOnlineParticipantIds(channelId)
+        .stream().filter(participantId -> !participantId.equals(senderUserId))
+        .forEach(
+            participantId -> CompletableFuture.runAsync(() -> messageSender.accept(participantId)));
   }
 }

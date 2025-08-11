@@ -7,6 +7,7 @@ import com.ddoongs.chatting.dto.projection.CountProjection;
 import com.ddoongs.chatting.dto.projection.UsernameProjection;
 import com.ddoongs.chatting.entity.UserEntity;
 import com.ddoongs.chatting.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class UserService {
 
   public Optional<InviteCode> getInviteCode(UserId userId) {
     return userRepository.findInviteCodeByUserId(userId.id())
-        .map(inviteCode -> new InviteCode(inviteCode.getConnectionInviteCode()));
+        .map(inviteCode -> new InviteCode(inviteCode.getInviteCode()));
   }
 
   public Optional<Integer> getConnectionCount(UserId userId) {
@@ -43,13 +44,20 @@ public class UserService {
     return userRepository.findUsernameByUserId(userId.id()).map(UsernameProjection::getUsername);
   }
 
+  public List<UserId> getUserIds(List<String> usernames) {
+    return userRepository.findUserIdsByUsernameIn(usernames)
+        .stream()
+        .map(projection -> new UserId(projection.getUserId()))
+        .toList();
+  }
+
   public Optional<UserId> getUserId(String username) {
     return userRepository.findByUsername(username)
         .map(userEntity -> new UserId(userEntity.getUserId()));
   }
 
   public Optional<User> getUser(InviteCode inviteCode) {
-    return userRepository.findByConnectionInviteCode(inviteCode.code())
+    return userRepository.findByInviteCode(inviteCode.code())
         .map(entity -> new User(new UserId(
             entity.getUserId()), entity.getUsername()));
   }
