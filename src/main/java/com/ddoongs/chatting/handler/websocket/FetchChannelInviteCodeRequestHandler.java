@@ -32,19 +32,19 @@ public class FetchChannelInviteCodeRequestHandler implements
     if (!channelService.isJoined(senderUserId, request.getChannelId())) {
       webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(
           MessageType.FETCH_CHANNEL_INVITE_CODE_REQUEST, "Not joined the channel"));
-
-      channelService.getInviteCode(request.getChannelId()).ifPresentOrElse(
-          inviteCode -> webSocketSessionManager.sendMessage(senderSession,
-              new FetchChannelInviteCodeResponse(
-                  request.getChannelId(),
-                  inviteCode
-              )), () -> {
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(
-                MessageType.FETCH_CHANNEL_INVITE_CODE_REQUEST,
-                "Fetch channel invite code failed."));
-          }
-      );
     }
+
+    channelService.getInviteCode(request.getChannelId()).ifPresentOrElse(
+        inviteCode -> webSocketSessionManager.sendMessage(senderSession,
+            new FetchChannelInviteCodeResponse(
+                request.getChannelId(),
+                inviteCode
+            )), () -> {
+          webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(
+              MessageType.FETCH_CHANNEL_INVITE_CODE_REQUEST,
+              "Fetch channel invite code failed."));
+        }
+    );
 
   }
 }
