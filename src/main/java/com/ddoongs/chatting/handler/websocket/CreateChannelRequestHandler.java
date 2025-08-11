@@ -12,7 +12,9 @@ import com.ddoongs.chatting.dto.websocket.outbound.ErrorResponse;
 import com.ddoongs.chatting.service.ChannelService;
 import com.ddoongs.chatting.service.UserService;
 import com.ddoongs.chatting.session.WebSocketSessionManager;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
@@ -36,18 +38,18 @@ public class CreateChannelRequestHandler implements BaseRequestHandler<CreateCha
     UserId senderUserId =
         (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
 
-    Optional<UserId> userId = userService.getUserId(request.getParticipantUsername());
-    if (userId.isEmpty()) {
+    List<UserId> participantUserIds = userService.getUserIds(request.getParticipantUsernames());
+
+    if (participantUserIds.isEmpty()) {
       webSocketSessionManager.sendMessage(senderSession,
           new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST,
               ResultType.NOT_FOUND.getMessage()));
       return;
     }
 
-    UserId participantUserId = userId.get();
     Pair<Optional<Channel>, ResultType> result;
     try {
-      result = channelService.create(senderUserId, participantUserId, request.getTitle());
+      result = channelService.create(senderUserId, participantUserIds, request.getTitle());
     } catch (Exception ex) {
       webSocketSessionManager.sendMessage(senderSession,
           new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST,
@@ -55,17 +57,31 @@ public class CreateChannelRequestHandler implements BaseRequestHandler<CreateCha
       return;
     }
 
-    result.getFirst().ifPresentOrElse(channel -> {
-      webSocketSessionManager.sendMessage(
-          senderSession,
-          new CreateChannelResponse(channel.channelId(),
-              channel.title()));
-      webSocketSessionManager.sendMessage(
-          webSocketSessionManager.getSession(participantUserId),
-          new ChannelJoinNotification(channel.channelId(),
-              channel.title()));
-    }, () -> webSocketSessionManager.sendMessage(senderSession,
-        new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST,
-            result.getSecond().getMessage())));
+    if (result.getFirst().isEmpty()) {
+      webSocketSessionManager.sendMessage(senderSession,
+          new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST,
+              result.getSecond().getMessage()));
+      return;
+    }
+
+    Channel channel = result.getFirst().get();
+
+    webSocketSessionManager.sendMessage(
+        senderSession,
+        new CreateChannelResponse(channel.channelId(),
+            channel.title()));
+
+    participantUserIds.forEach(participantUserId ->
+        CompletableFuture.runAsync(() ->
+            {
+              WebSocketSession participantSession =
+                  webSocketSessionManager.getSession(participantUserId);
+              if (participantSession != null) {
+                webSocketSessionManager.sendMessage(
+                    participantSession,
+                    new ChannelJoinNotification(channel.channelId(), channel.title()));
+              }
+            }
+        ));
   }
 }
